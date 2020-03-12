@@ -4,6 +4,7 @@ This page describes the structure of a common problem in
 [Jutge.org](https://jutge.org/) and how to prepare it with the
 `make-problem` command of the tookit.
 
+Table of contents:
 * [Usage](#usage)
 * [Problem structure](#problem-structure)
 * [Problem files](#problem-files)
@@ -15,7 +16,7 @@ This page describes the structure of a common problem in
     * [Solutions](#solutions)
     * [Scores](#scores)
     * [Awards](#awards)
-* [Demo problems](#demo-problems)
+* [Sample problems](#sample-problems)
 
 
 # Usage
@@ -438,9 +439,9 @@ The `award.html` file should contain a description of the award using simple HTM
 
 
 
-## Demo problems
+## Sample problems
 
-Some sample problems are given under the `examples/problems` directory.
+Some sample problems are given under the [`examples/problems`](../examples/problems) directory.
 The following list highlights their main features.
 
 - `bon-dia.pbm`:

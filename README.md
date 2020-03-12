@@ -25,8 +25,8 @@ There are three commands:
 
 - `list-compilers`: Outputs information on the available compilers.
 
-For full details, please refer to the [`common problem documentation`](documentation/problems.md)
-and to the [`quiz problem documentation`](documentation/quizzes.md).
+For full details, please refer to the [common problem documentation](documentation/problems.md)
+and to the [quiz problem documentation](documentation/quizzes.md).
 
 
 # Credits
