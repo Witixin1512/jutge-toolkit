@@ -12,7 +12,8 @@ import json
 import random
 import os
 import time
-
+import argparse
+from colorama import init, Fore, Style
 
 def error(title, reason):
     raise Exception('--- ERROR in question '+str(title)+' --- '+str(reason))
@@ -220,7 +221,7 @@ def build_q(fname, title):
     subs = string.Template(q).substitute(ldict)
 
     # get the text back to data
-    output = yaml.load(subs)
+    output = yaml.load(subs, Loader=yaml.FullLoader)
     # make sure we have the mandatory attributes
     text = output.get("text")
     if text == None:
@@ -260,10 +261,8 @@ def check_list(thing, title, name):
     if not isinstance(thing, list):
         error(title, str(name) + " must be a list!")
 
-
-def main():
-    seed = int(sys.argv[1])
-    quiz = yaml.load(open("quiz.yml"))
+def make_quiz(seed):
+    quiz = yaml.load(open("quiz.yml"), Loader=yaml.FullLoader)
 
     random.seed(seed)
 
@@ -294,6 +293,29 @@ def main():
         error("quiz", "Scores don't add to 100!!!")
 
     json.dump(quiz, sys.stdout, indent=4)
+
+
+def main():
+    init()
+
+    parser = argparse.ArgumentParser(
+        usage="%(prog)s seed",
+        description="Generate .json files for Jutge quizzes",
+    )
+
+    # Parse options with real arguments
+    _, args = parser.parse_known_args()
+
+    seed = 0
+    if len(args) == 0:
+        seed = random.randint(0,10000)
+    else:
+        seed = args[0]
+
+    for dir in next(os.walk('.'))[1]:
+        os.chdir(dir)
+        make_quiz(seed)
+        os.chdir('..')
 
 
 if __name__ == '__main__':

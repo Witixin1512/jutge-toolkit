@@ -56,7 +56,7 @@ def check_dependencies():
                 print(missing_dep, end=', ')
             else:
                 print(missing_dep + Style.RESET_ALL)
-        exit()
+        sys.exit(0)
 
 
 # ----------------------------------------------------------------------------
@@ -65,6 +65,7 @@ def check_dependencies():
 
 def make_executable():
     """Compiles the solution in the cwd."""
+    print(Style.BRIGHT + "Generating correct executable..." + Style.RESET_ALL)
 
     if not util.file_exists("handler.yml"):
         raise Exception("handler.yml does not exist")
@@ -87,7 +88,10 @@ def make_executable():
     else:  # if handler.get('solution', '') == 'C++' or not specified
         com = compilers.compiler('GXX', handler, 'solution')
 
-    com.compile()
+    ret = com.compile()
+    if not ret:
+        sys.exit(0)
+    print()
     return com
 
 # ----------------------------------------------------------------------------
@@ -95,11 +99,9 @@ def make_executable():
 # ----------------------------------------------------------------------------
 
 
-def make_corrects():
+def make_corrects(com, iterations=1):
     """Makes all correct files in the cwd."""
     print(Style.BRIGHT + "Generating correct files..." + Style.RESET_ALL)
-
-    com = make_executable()
 
     handler = util.read_yml("handler.yml")
 
@@ -111,14 +113,17 @@ def make_corrects():
     inps = sorted(glob.glob("*.inp"))
     for inp in inps:
         tst = os.path.splitext(inp)[0]
-        com.execute(tst, True)
+        time = com.execute(tst, True, iterations)
+
+        outsize = os.path.getsize(tst + ".cor")
+        print(Style.DIM + '\t\ttime: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
 
 # ----------------------------------------------------------------------------
 # Verify program
 # ----------------------------------------------------------------------------
 
 
-def verify_program(program):
+def verify_program(program, correct_extension='', iterations=1):
     """Verify that program compiles and gets AC for each test."""
 
     if not util.file_exists("handler.yml"):
@@ -130,7 +135,17 @@ def verify_program(program):
     # compile
     available_list = []
     supported_list = compilers.compiler_extensions(handler.get('compilers'))
-    solution_list = sorted(glob.glob(program + ".*[!exe,dir]"))
+
+    file_list = sorted(glob.glob(program + ".*"))
+
+    solution_list = []
+    excluded_extensions = ['exe', 'dir', correct_extension]
+    for file in file_list:
+        exclude = False
+        for extension in excluded_extensions:
+            if file.split('.')[-1] == extension: exclude = True
+        if not exclude: solution_list.append(file)
+    if solution_list == []: return
 
     print(Style.BRIGHT + "Compiling supported programs..." + Style.RESET_ALL)
     for solution in solution_list:
@@ -138,7 +153,7 @@ def verify_program(program):
         ext = os.path.splitext(solution)[-1][1:]
         if ext in supported_list:
             com = compilers.compiler(supported_list[ext], handler, name)
-            com.compile()
+            ret = com.compile()
             available_list.append([solution, com])
 
     print()
@@ -162,7 +177,8 @@ def verify_program(program):
         ext = os.path.splitext(solution)[-1]
         for test in tests:
             tst = os.path.splitext(test)[0]
-            compiler.execute(tst, False)
+            time = compiler.execute(tst, False, iterations)
+            outsize = os.path.getsize(tst + ext + ".out")
 
             r = subprocess.call(["cmp", tst + ext + ".out", tst + ".cor"])
             if r:
@@ -172,13 +188,45 @@ def verify_program(program):
                 msg = "OK"
                 util.del_file(tst + ext + ".out")
             print((Fore.GREEN if msg == 'OK' else Fore.RED) +
-                  "%s.inp:\t\t%s" % (tst, msg) + Style.RESET_ALL)
+                  "%s.inp:\t\t%s\t\ttime: %f\t\tsize: %s" %
+                  (tst, msg, time, util.convert_bytes(outsize)) + Style.RESET_ALL)
+            if outsize > 2000000 and not os.path.isfile(tst + ext + ".ops"):
+                print(Fore.YELLOW + 'Warning: The output file is bigger than 2MB, you may need a .ops file for this test case.')
         print()
 
     if has_failed:
         print(Fore.RED + "Some solutions are not correct! Please check them and try again." + Style.RESET_ALL)
         sys.exit(0)
 
+# ----------------------------------------------------------------------------
+# Clean files
+# ----------------------------------------------------------------------------
+
+def clean_files(forced=False):
+    removed_list = []
+    for dirpath, dirnames, filenames in os.walk('.'):
+        for filename in filenames:
+            if re.match('.*\.exe|.*\.cor|problem\..*\.pdf|problem\..*\.ps', filename):
+                removed_list.append(dirpath + '/' + filename)
+
+    if removed_list == []:
+        print("The directories are clean, no files will be removed.")
+        return
+
+    print("The following files " + Style.BRIGHT + "will be" + Style.RESET_ALL + " removed:")
+    for elem in sorted(removed_list):
+        print(Style.DIM + elem + Style.RESET_ALL)
+    print()
+
+    if not forced:
+        answer = input("Are you sure? [Y/n]: ")
+        if answer != 'Y': return
+
+    print("\nCleaning problem...")
+    for elem in removed_list:
+        os.remove(elem)
+
+    print(Fore.GREEN + 'Done!' + Style.RESET_ALL)
 
 # ----------------------------------------------------------------------------
 # Make printable files (pdf)
@@ -246,12 +294,12 @@ handler.yml: \verbatimtabinput{handler.yml}
 
     util.write_file("main.tex", t)
 
-    print(Style.BRIGHT + "Generating .ps and .pdf files... ", end=Style.RESET_ALL)
+    print(Style.BRIGHT + "Generating .pdf file...   ", end=Style.RESET_ALL)
     r = os.system("latex -interaction scrollmode main > main.err")
     if r != 0:
         os.system('cat main.err')
         raise Exception(
-            Fore.RED + "\nLaTeX error, please make sure that LaTeX is installed on your computer." + Style.RESET_ALL)
+            Fore.RED + "\nLaTeX error!" + Style.RESET_ALL)
 
     r = os.system("dvips main -o 1> /dev/null 2>/dev/null")
     if r != 0:
@@ -261,7 +309,7 @@ handler.yml: \verbatimtabinput{handler.yml}
     if r != 0:
         raise Exception(Fore.RED + "\nps2pdf error!" + Style.RESET_ALL)
 
-    os.system("rm main.ps")
+    os.remove("main.ps")
     os.system("mv main.pdf %s/problem.%s.pdf" % (ori, lang))
 
     print(Fore.GREEN + 'Done!' + Style.RESET_ALL)
@@ -295,9 +343,8 @@ def make_prints():
             lang = pbm.replace("problem.", "").replace(".tex", "")
             make_prints2(lang)
     else:
-        dirs = sorted(glob.glob("*"))
-        for d in dirs:
-            if os.path.isdir(d) and d in languages:
+        for d in next(os.walk('.'))[1]:
+            if d in languages:
                 os.chdir(d)
                 make_prints2(d)
                 os.chdir("..")
@@ -309,36 +356,51 @@ def make_prints():
 # Make everything in a problem directory
 # ----------------------------------------------------------------------------
 
-def make_all():
+def make_all(iterations=1):
     """Makes exe, cors, pdf files for the problem in the cwd."""
 
     pbms = sorted(glob.glob("problem.*.tex"))
     if pbms:
-        make_corrects()
+        com = make_executable()
+        make_corrects(com)
         print()
+        verify_program("solution", com.extension(), iterations)
         for pbm in pbms:
             lang = pbm.replace("problem.", "").replace(".tex", "")
-            verify_program("solution")
             print()
             make_prints2(lang)
-            print('----------------------------------------\n')
     else:
-        dirs = sorted(glob.glob("*"))
-        for d in dirs:
-            if os.path.isdir(d) and d in languages:
+        for d in next(os.walk('.'))[1]:
+            if d in languages:
                 os.chdir(d)
                 print(Style.BRIGHT + "Working on " +
                       os.getcwd() + "..." + Style.RESET_ALL)
                 print()
-                make_corrects()
+                com = make_executable()
+                make_corrects(com)
                 print()
-                verify_program("solution")
+                verify_program("solution", com.extension(), iterations)
                 print()
                 make_prints2(d)
                 os.chdir("..")
-                print('----------------------------------------\n')
+                print()
             else:
                 print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+
+    found_png = False
+    found_html = False
+    for dirpath, dirnames, filenames in os.walk('.'):
+        if 'award.png' in filenames:
+            found_png = True
+        if 'award.html' in filenames:
+            found_html = True
+
+    if not found_png:
+        if found_html:
+            print(Fore.YELLOW + "WARNING: award.html was found but there's no award.png!" + Style.RESET_ALL)
+        else:
+            print(Fore.YELLOW + 'WARNING: this problem doesn\'t have awards')
+
 
 
 # ----------------------------------------------------------------------------
@@ -365,22 +427,20 @@ def make_recursive_2():
 
     else:
         cwd = os.getcwd()
-        for path in sorted(glob.glob("*")):
-            if os.path.isdir(path):
-                os.chdir(path)
-                make_recursive_2()
-                os.chdir(cwd)
+        for path in next(os.walk('.'))[1]:
+            os.chdir(path)
+            make_recursive_2()
+            os.chdir(cwd)
 
 
 def make_recursive(paths):
     global errors
     errors = []
     cwd = os.getcwd()
-    for path in sorted(paths):
-        if os.path.isdir(path):
-            os.chdir(path)
-            make_recursive_2()
-            os.chdir(cwd)
+    for path in next(os.walk(paths))[1]:
+        os.chdir(path)
+        make_recursive_2()
+        os.chdir(cwd)
     if errors:
         print(Fore.RED + "------------------------------------------")
         print("Errors:")
@@ -408,11 +468,10 @@ def make_list_2():
         print(cwd + " " + " ".join(sorted(langs)))
 
     else:
-        for path in sorted(glob.glob("*")):
-            if os.path.isdir(path):
-                os.chdir(path)
-                make_list_2()
-                os.chdir(cwd)
+        for path in next(os.walk(paths))[1]:
+            os.chdir(path)
+            make_list_2()
+            os.chdir(cwd)
 
 
 def make_list(paths):
@@ -450,10 +509,14 @@ def main():
                         action="store_true")
     parser.add_argument("--list", help="list all recursively (cwd if ommitted)",
                         action="store_true")
+    parser.add_argument("--iterations", help="choose how many times the programs will be executed in order to get a more accurate execution time",
+                        type=int, default=1)
     parser.add_argument("--verify", help="verify correctness of a program",
                         action='store', dest="verify", type=str, nargs='?', metavar="PROGRAM")
-    parser.add_argument("--verbose", help="set verbosity level (0-3) NOT YET IMPLEMENTED",
-                        type=int, default=3, metavar="NUMBER")
+    parser.add_argument("--clean", help="removes all generated files (*.exe, *.cor, *.pdf)",
+                        action="store_true")
+    parser.add_argument("-f", "--force", help="don't prompt when removing generated files",
+                        action="store_true")
     parser.add_argument("--stop-on-error", help="stop on first error (for --mk-rec) NOT YET IMPLEMENTED",
                         action="store_true", default=False)
 
@@ -473,7 +536,7 @@ def main():
         make_prints()
     if args.all:
         done = True
-        make_all()
+        make_all(args.iterations)
     if args.recursive:
         done = True
         if paths == []:
@@ -487,11 +550,25 @@ def main():
     if args.verify:
         done = True
         if args.verify == None:
-            verify_program("solution")
+            verify_program("solution", iterations=args.iterations)
         else:
-            verify_program(args.verify)
+            for d in next(os.walk('.'))[1]:
+                os.chdir(d)
+                if args.verify in ' '.join(glob.glob('*')):
+                    print(Style.BRIGHT + "Working on " +
+                          os.getcwd() + "..." + Style.RESET_ALL)
+                    print()
+                    verify_program(args.verify, iterations=args.iterations)
+                os.chdir('..')
+
+    if args.clean:
+        done = True
+        if args.force:
+            clean_files(forced=True)
+        else:
+            clean_files()
     if not done:
-        make_all()
+        make_all(args.iterations)
 
 
 if __name__ == '__main__':

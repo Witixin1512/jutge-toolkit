@@ -9,8 +9,10 @@ import logging
 import math
 import glob
 import codecs
+import timeit
+from colorama import init, Fore, Style
 
-from . import util
+from jtoolkit import util
 
 # Maximum time to compile
 max_compilation_time = 30
@@ -89,7 +91,7 @@ class Compiler:
         '''Doc missing.'''
         raise Exception('Abstract method')
 
-    def execute(self, tst):
+    def execute(self, tst, correct, iterations=1):
         '''Doc missing.'''
         raise Exception('Abstract method')
 
@@ -99,7 +101,20 @@ class Compiler:
         if pid == 0:
             # Child
             logging.info(cmd)
-            os.system(cmd)
+            print(Style.DIM + cmd + Style.RESET_ALL)
+
+            error = False
+            try:
+                result = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as exec:
+                print(exec.output.decode('utf-8'))
+                error = True
+
+            if error or len(result) != 0:
+                if len(result) != 0: print('\n' + result.decode('utf-8').strip() + '\n')
+                print(Style.BRIGHT + Fore.RED + 'Compilation error! ' + Style.NORMAL + 'Please check ' + self.name + '.' + self.extension() + ' and try again.' + Style.RESET_ALL)
+                os._exit(1)
+
             if util.file_exists('program.exe'):
                 os.system('strip program.exe')
             os._exit(0)
@@ -110,10 +125,13 @@ class Compiler:
                 ret = os.waitpid(pid, os.WNOHANG)
                 if ret[0] != 0:
                     # Ok!
+                    if ret[1] != 0: sys.exit(0)
                     return
+
                 time.sleep(0.1)
                 c += 0.1
             os.kill(pid, signal.SIGKILL)
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             raise CompilationTooLong
 
     def get_version(self, cmd, lin):
@@ -163,16 +181,18 @@ class Compiler_GCC (Compiler):
     def extension(self):
         return 'c'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end='')
         else:
             ext = 'c.out'
-            func = os
 
-        func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))
+        '''func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))'''
+        func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
     def compile(self):
         if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
@@ -185,9 +205,9 @@ class Compiler_GCC (Compiler):
         util.del_file(self.executable())
         try:
             self.execute_compiler('gcc ' + self.flags1() + ' ' + self.name +
-                                  '.c -o ' + self.executable() + ' -lm 2> compilation1.txt')
+                                  '.c -o ' + self.executable() + ' -lm')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
         return util.file_exists(self.executable())
@@ -220,9 +240,9 @@ int main() {
         util.del_file(self.executable())
         try:
             self.execute_compiler('gcc ' + self.flags2() + ' modified.c -o ' +
-                                  self.executable() + ' -lm 2> compilation2.txt')
+                                  self.executable() + ' -lm')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             util.del_file('modified.c')
             return False
@@ -232,7 +252,7 @@ int main() {
         if util.file_exists(self.executable()):
             return True
         else:
-            util.write_file('compilation1.txt', "Unreported error. ")
+            print(Style.BRIGHT + Fore.RED + 'Unreported error.' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
 
@@ -267,16 +287,19 @@ class Compiler_GXX (Compiler):
     def extension(self):
         return 'cc'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end = '')
         else:
             ext = 'cc.out'
-            func = os
 
-        func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))
+
+        '''func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))'''
+        func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
     def compile(self):
         if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
@@ -289,9 +312,9 @@ class Compiler_GXX (Compiler):
         util.del_file(self.executable())
         try:
             self.execute_compiler('g++ ' + self.flags1() + ' ' + self.name +
-                                  '.cc -o ' + self.executable() + ' 2> compilation1.txt')
+                                  '.cc -o ' + self.executable())
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
         return util.file_exists(self.executable())
@@ -324,9 +347,9 @@ int main() {
         util.del_file(self.executable())
         try:
             self.execute_compiler(
-                'g++ ' + self.flags2() + ' modified.cc -o ' + self.executable() + ' 2> compilation2.txt')
+                'g++ ' + self.flags2() + ' modified.cc -o ' + self.executable())
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             util.del_file('modified.cc')
             return False
@@ -336,7 +359,7 @@ int main() {
         if util.file_exists(self.executable()):
             return True
         else:
-            util.write_file('compilation1.txt', "Unreported error. ")
+            print(Style.BRIGHT + Fore.RED + 'Unreported error.' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
 
@@ -408,16 +431,19 @@ class Compiler_GHC (Compiler):
     def extension(self):
         return 'hs'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end = '')
         else:
             ext = 'hs.out'
-            func = os
 
-        func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))
+
+        '''func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))'''
+        func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
     def compile(self):
         if 'source_modifier' in self.handler and self.handler['source_modifier'] == 'no_main':
@@ -429,9 +455,9 @@ class Compiler_GHC (Compiler):
         util.del_file(self.executable())
         try:
             self.execute_compiler('ghc ' + self.flags1() + ' ' + self.name +
-                                  '.hs -o ' + self.executable() + ' 1> /dev/null 2> compilation1.txt')
+                                  '.hs -o ' + self.executable() + ' 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
 
@@ -453,9 +479,9 @@ class Compiler_GHC (Compiler):
         util.del_file(self.executable())
         try:
             self.execute_compiler('ghc ' + self.flags1() + ' modified.hs -o ' +
-                                  self.executable() + ' 1> /dev/null 2> compilation1.txt')
+                                  self.executable() + ' 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             util.del_file(self.executable())
             return False
 
@@ -493,17 +519,22 @@ class Compiler_RunHaskell (Compiler):
     def extension(self):
         return 'hs'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("runhaskell work.hs > %s.%s" % (tst, ext), end='')
         else:
             ext = 'hs.out'
-            func = os
 
         self.compile_work(tst)
-        func.system("runhaskell work.hs > %s.%s" % (tst, ext))
+
+        '''func.system("runhaskell work.hs > %s.%s" % (tst, ext))'''
+        func = 'import os; os.system("runhaskell work.hs > %s.%s")' % (tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+
         util.del_file('work.hs')
+
+        return time
 
     def compile(self):
         util.del_file("work")
@@ -515,10 +546,9 @@ class Compiler_RunHaskell (Compiler):
         f.close()
 
         try:
-            self.execute_compiler(
-                'ghc -O3 work.hs 1> /dev/null 2> compilation1.txt')
+            self.execute_compiler('ghc -O3 work.hs 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
 
         util.del_file("work")
@@ -547,9 +577,9 @@ class Compiler_RunHaskell (Compiler):
                     print("    print (%s)" % line, file=f)
             f.close()
             self.execute_compiler(
-                'ghc ' + self.flags1() + ' work.hs -o work.exe 1> /dev/null 2> compilation1.txt')
+                'ghc ' + self.flags1() + ' work.hs -o work.exe 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
 
         if util.file_exists('work.exe'):
@@ -601,31 +631,32 @@ py_compile.compile(sys.argv[1])
     def del_wrapper(self):
         util.del_file('py3c.py')
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("python3 %s.py > %s.%s" % (self.name, tst, ext), end='')
         else:
             ext = 'py.out'
-            func = os
 
         if self.compile_with(tst + ".inp"):
-            func.system("python3 %s.py > %s.%s" % (self.name, tst, ext))
+            '''func.system("python3 %s.py > %s.%s" % (self.name, tst, ext))'''
+            func = 'import os; os.system("python3 %s.py > %s.%s")' % (self.name, tst, ext)
+            time = timeit.timeit(func, number=iterations)/iterations
             util.del_dir('__pycache__')
+            return time
         else:
-            return False
+            return -1
 
     def compile(self):
-        util.del_file('compilation1.txt')
         try:
             self.gen_wrapper()
             self.execute_compiler(
-                'python3 py3c.py ' + self.name + '.py 1> /dev/null 2> compilation1.txt')
+                'python3 py3c.py ' + self.name + '.py 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         self.del_wrapper()
-        return util.file_size('compilation1.txt') == 0
+        return True
 
     def compile_with(self, extra):
         try:
@@ -637,10 +668,11 @@ py_compile.compile(sys.argv[1])
             os.system("cat %s >> work.py" % extra)
             self.gen_wrapper()
             self.execute_compiler(
-                'python3 py3c.py work.py 1> /dev/null 2> compilation2.txt')
+                'python3 py3c.py work.py 1> /dev/null')
             return True
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
+            return False
 
         self.del_wrapper()
         return False
@@ -696,15 +728,18 @@ class WrapperMain {
     def del_wrapper(self):
         util.del_file('wrapper.java')
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("java Main < %s.inp > %s.%s" % (tst, tst, ext), end='')
         else:
             ext = 'java.out'
-            func = os
 
-        func.system("java Main < %s.inp > %s.%s" % (tst, tst, ext))
+        '''func.system("java Main < %s.inp > %s.%s" % (tst, tst, ext))'''
+        func = 'import os; os.system("java Main < %s.inp > %s.%s")' % (tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
+
 
     def compile(self):
         if 'source_modifier' in self.handler and self.handler['source_modifier'] == 'no_main':
@@ -719,9 +754,9 @@ class WrapperMain {
             util.copy_file(self.name + '.java', 'Main.java')
             self.gen_wrapper()
             self.execute_compiler(
-                'javac ' + self.flags1() + ' wrapper.java 2> compilation1.txt')
+                'javac ' + self.flags1() + ' wrapper.java')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
 
         self.del_wrapper()
@@ -735,16 +770,16 @@ class WrapperMain {
         try:
             # create Solution.class
             self.execute_compiler(
-                'javac ' + self.flags1() + ' ' + self.name + '.java 2> compilation1.txt')
+                'javac ' + self.flags1() + ' ' + self.name + '.java')
             # create Main.class
             self.execute_compiler(
-                'javac ' + self.flags1() + ' main.java 2> compilation2.txt')
+                'javac ' + self.flags1() + ' main.java')
             # create JudgeMain.class
             self.gen_wrapper()
             self.execute_compiler(
-                'javac ' + self.flags1() + ' wrapper.java 2> compilation2.txt')
+                'javac ' + self.flags1() + ' wrapper.java')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         self.del_wrapper()
         return util.file_exists('Main.class')
@@ -791,14 +826,7 @@ py_compile.compile(sys.argv[1])
     def del_wrapper(self):
         util.del_file('py3c.py')
 
-    def execute(self, tst, correct):
-        if correct:
-            ext = 'cor'
-            func = util
-        else:
-            ext = 'py.out'
-            func = os
-
+    def execute(self, tst, correct, iterations=1):
         if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             util.copy_file(self.name + '.py', 'modified.py')
             ori = util.read_file(self.name + '.py')
@@ -809,9 +837,20 @@ py_compile.compile(sys.argv[1])
         else:
             exec = self.executable()
 
-        func.system("python3 %s < %s.inp > %s.%s" % (exec, tst, tst, ext))
+        if correct:
+            ext = 'cor'
+            print("python3 %s < %s.inp > %s.%s" % (exec, tst, tst, ext), end='')
+        else:
+            ext = 'py.out'
+
+        '''func.system("python3 %s < %s.inp > %s.%s" % (exec, tst, tst, ext))'''
+        func = 'import os; os.system("python3 %s < %s.inp > %s.%s")' % (exec, tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+
         util.del_file('modified.py')
         util.del_dir('__pycache__')
+
+        return time
 
     def compile(self):
         if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
@@ -820,7 +859,6 @@ py_compile.compile(sys.argv[1])
             return self.compile_normal()
 
     def compile_normal(self):
-        util.del_file('compilation1.txt')
         try:
             self.gen_wrapper()
             util.write_file('py3c.py',
@@ -830,12 +868,12 @@ import py_compile, sys
 
 py_compile.compile(sys.argv[1])""")
             self.execute_compiler(
-                'python3 py3c.py ' + self.name + '.py 1> /dev/null 2> compilation1.txt')
+                'python3 py3c.py ' + self.name + '.py 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         self.del_wrapper()
-        return util.file_size('compilation1.txt') == 0
+        return True
 
     def compile_no_main(self):
         if not self.compile_normal():
@@ -848,16 +886,15 @@ py_compile.compile(sys.argv[1])""")
         util.write_file('modified.py', '%s\n%s\n' % (ori, main))
 
         # Compile modified program
-        util.del_file('compilation2.txt')
         try:
             self.gen_wrapper()
             self.execute_compiler(
-                'python3 py3c.py modified.py 1> /dev/null 2> compilation2.txt')
+                'python3 py3c.py modified.py 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         self.del_wrapper()
-        return util.file_size('compilation2.txt') == 0
+        return True
 
 
 class Compiler_R (Compiler):
@@ -888,15 +925,17 @@ class Compiler_R (Compiler):
     def extension(self):
         return 'R'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("Rscript solution.R < %s.inp > %s.%s" % (tst, tst, ext), end='')
         else:
             ext = 'R.out'
-            func = os
 
-        func.system("Rscript solution.R < %s.inp > %s.%s" % (tst, tst, ext))
+        '''func.system("Rscript solution.R < %s.inp > %s.%s" % (tst, tst, ext))'''
+        func = 'import os; os.system("Rscript solution.R < %s.inp > %s.%s")' % (tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
     def compile(self):
         if self.handler['source_modifier'] == 'no_main':
@@ -905,7 +944,6 @@ class Compiler_R (Compiler):
             return self.compile_normal()
 
     def compile_normal(self):
-        util.del_file('compilation1.txt')
         try:
             s = util.read_file(self.name + ".R")
             util.write_file("wrapper.R",
@@ -925,13 +963,13 @@ source("wrapper.R")
 checkUsage(wrapper_R)
             """)
             self.execute_compiler(
-                'Rscript compiler.R 1> /dev/null 2> compilation1.txt')
+                'Rscript compiler.R 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         util.del_file("compiler.R")
         util.del_file("wrapper.R")
-        return util.file_size('compilation1.txt') == 0
+        return True
 
     def compile_no_main(self):
         # Modify the program
@@ -958,9 +996,9 @@ source("wrapper.R")
 checkUsage(wrapper_R)
         """ % s)
             self.execute_compiler(
-                'Rscript compiler.R 1> /dev/null 2> compilation1.txt')
+                'Rscript compiler.R 1> /dev/null')
         except CompilationTooLong:
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         util.del_file("compiler.R")
         util.del_file("wrapper.R")
@@ -996,16 +1034,18 @@ class Compiler_PRO2 (Compiler):
     def extension(self):
         return 'cc'
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end='')
         else:
             ext = 'pro2.out'
-            func = os
 
-        func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))
+        '''func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))'''
+        func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
     def compile(self):
         util.del_file(self.executable())
@@ -1025,10 +1065,10 @@ class Compiler_PRO2 (Compiler):
 
             os.chdir(self.name + ".dir")
             self.execute_compiler('g++ ' + self.flags1() + ' *.cc -o ../' +
-                                  self.executable() + ' 2> ../compilation1.txt')
+                                  self.executable())
         except CompilationTooLong:
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             os.chdir('..')
-            util.write_file('compilation1.txt', 'Compilation time exceeded')
             util.del_file(self.executable())
             return False
         os.chdir('..')
@@ -1091,9 +1131,9 @@ class Compiler_MakePRO2 (Compiler):
             os.chdir(self.name + '.dir')
 
             self.execute_compiler('make ' + self.name +
-                                  '.exe 1> make.log 2> ../compilation1.txt')
+                                  '.exe 1> make.log')
         except CompilationTooLong:
-            util.write_file('../compilation1.txt', 'Compilation time exceeded')
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             os.chdir('..')
             return False
 
@@ -1112,16 +1152,18 @@ class Compiler_MakePRO2 (Compiler):
         else:
             return False
 
-    def execute(self, tst, correct):
+    def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            func = util
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end='')
         else:
             ext = 'makepro2.out'
-            func = os
 
-        func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))
+        '''func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))'''
+        func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
+        time = timeit.timeit(func, number=iterations)/iterations
+        return time
 
 ################################################################################
 

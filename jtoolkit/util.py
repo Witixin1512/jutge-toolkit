@@ -311,6 +311,16 @@ def myprint(msg):
     sys.stderr.flush()
     sys.stdout.flush()
 
+def convert_bytes(num):
+    """Converts bytes to Mb, Gb, etc"""
+    step_unit = 1000.0 #1024 bad the size
+
+    for x in ['bytes', 'Kb', 'Mb', 'Gb', 'Tb']:
+        if num < step_unit:
+            if x == 'bytes': return "%i %s" % (num, x)
+            else: return "%3.1 %s" % (num, x)
+        num /= step_unit
+
 
 # ----------------------------------------------------------------------------
 # Utilities for deamons

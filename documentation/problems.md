@@ -35,7 +35,9 @@ problem statement.
 - `--all` : Does everything mentioned above.
 - `--recursive`: The toolkit searches recursively for problems.
 - `--list`: Lists all the problems found recursively.
-- `--srclst`: Lists all the problem sources found recursively.
+- `--iterations`: Choose how many times the programs will be executed in order to get a more accurate execution time.
+- `--clean`: Removes all generated files (*.exe, *.cor, *.pdf).
+- `--force` or `-f`: Don't prompt when removing generated files.
 - `--verify`: Verify the correctness of a program.
 - `--help` or `-h` : Shows a help message with available arguments.
 

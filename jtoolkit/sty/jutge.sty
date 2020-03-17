@@ -21,6 +21,7 @@
 \usepackage{tikz}
 \usepackage{wasysym}
 \usepackage{eurosym}
+\usepackage{hyperref}
 
 
 \geometry{
@@ -223,10 +224,12 @@
 
 \newcommand{\directori}{}
 
-\newcommand{\CPP}{C++}
+\newcommand{\CPP}{
+    C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}
+}
 
 \newcommand{\Link}[1]{
-     \textsf{\footnotesize{#1}}
+     \href{https://jutge.org/problems/#1}{#1}
 }
 
 
