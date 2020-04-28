@@ -2,7 +2,7 @@
 
 This page describes the structure of a common problem in
 [Jutge.org](https://jutge.org/) and how to prepare it with the
-`make-problem` command of the tookit.
+`jutge-make-problem` command of the tookit.
 
 Table of contents:
 * [Usage](#usage)
@@ -21,13 +21,13 @@ Table of contents:
 
 # Usage
 
-The common scenario is to run `make-problem`
+The common scenario is to run `jutge-make-problem`
 in the command line within a directory containing
 a problem. This will generate the correct outputs for each test case input
 using the defined solution and will also generate the PDF with the
 problem statement.
 
-`make-problem` supports the following arguments:
+`jutge-make-problem` supports the following arguments:
 
 - `--executable`: Makes the executables of the problems.
 - `--corrects `: Generates the solution files of the problems.

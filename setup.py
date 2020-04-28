@@ -11,11 +11,11 @@ version = "2.1.0"
 
 setup(
     name='jutge-toolkit',
-    packages=['jtoolkit'],
+    packages=['jutge.toolkit'],
     install_requires=['pyyaml>=5.1', 'colorama'],
     version=version,
-    description='Toolkit to create problems for Jutge.org',
-    long_description='Toolkit to create problems for Jutge.org',
+    description='Toolkit to make problems for Jutge.org',
+    long_description='Toolkit to make problems for Jutge.org',
     author='Jordi Petit et al',
     author_email='jpetit@cs.upc.edu',
     url='https://github.com/jutge-org/jutge-toolkit',
@@ -40,9 +40,9 @@ setup(
     setup_requires=['setuptools'],
     entry_points={
         'console_scripts': [
-            'make-problem=jtoolkit:problems.main',
-            'make-quiz=jtoolkit:quizzes.main',
-            'list-compilers=jtoolkit:compilers.main',
+            'jutge-make-problem=jutge.toolkit:problems.main',
+            'jutge-make-quiz=jutge.toolkit:quizzes.main',
+            'jutge-compilers=jutge.toolkit:compilers.main',
         ]
     }
 )

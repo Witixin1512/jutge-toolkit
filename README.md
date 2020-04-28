@@ -22,11 +22,11 @@ installed: LaTeX and various compilers.
 
 There are three commands:
 
-- `make-problem`: Makes all the necessary files to generate a common problem.
+- `jutge-make-problem`: Makes all the necessary files to generate a common problem.
 
-- `make-quiz`: Makes all the necessary files to generate a quiz problem.
+- `jutge-make-quiz`: Makes all the necessary files to generate a quiz problem.
 
-- `list-compilers`: Outputs information on the available compilers.
+- `jutge-compilers`: Outputs information on the available compilers.
 
 For full details, please refer to the [common problem documentation](documentation/problems.md)
 and to the [quiz problem documentation](documentation/quizzes.md).

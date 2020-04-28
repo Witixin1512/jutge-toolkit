@@ -2,7 +2,7 @@
 
 This page describes the structure of a quiz problem in
 [Jutge.org](https://jutge.org/) and how to prepare it with the
-`make-quiz` command of the tookit.
+`jutge-make-quiz` command of the tookit.
 
 
 # Sample quizzes
@@ -12,7 +12,7 @@ Some sample quizzes are given under the [`examples/quizzes`](../examples/quizzes
 
 # Usage
 
-In order to generate a quiz, simply execute `make-quiz` inside a directory
+In order to generate a quiz, simply execute `jutge-make-quiz` inside a directory
 that contains the quiz, passing as a unique parameter an integer number that
 will be used as the random seed. The output will be a JSON file with the generated
 quiz.

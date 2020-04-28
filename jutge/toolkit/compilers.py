@@ -12,7 +12,7 @@ import codecs
 import timeit
 from colorama import init, Fore, Style
 
-from jtoolkit import util
+from jutge.toolkit import util
 
 # Maximum time to compile
 max_compilation_time = 30
