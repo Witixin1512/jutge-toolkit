@@ -1,13 +1,16 @@
 # Toolkit to make problems for Jutge.org
 
-![Logo](documentation/logo.png)
+![Logo](documentation/jutge-toolkit.png)
+
+
+## Documentation
 
 The `jutge-toolit` toolkit provides command line tools to
 make all necessary files for problems in
 [Jutge.org](https://jutge.org/).
 
 
-# Installation
+## Installation
 
 Install the toolkit with `pip3 install jutge-toolkit`. You can upgrade it to the latest version with `pip3 install --upgrade jutge-toolkit`. If you want to uninstall it, use `pip3 uninstall jutge-toolkit`.
 
@@ -15,7 +18,7 @@ Install the toolkit with `pip3 install jutge-toolkit`. You can upgrade it to the
 installed: LaTeX and various compilers.
 
 
-# Documentation
+## Usage
 
 There are three commands:
 
@@ -29,13 +32,13 @@ For full details, please refer to the [common problem documentation](documentati
 and to the [quiz problem documentation](documentation/quizzes.md).
 
 
-# Credits
+## Credits
 
-- Jordi Petit https://github.com/jordi-petit
-- Cristina Raluca https://github.com/ralucado
-- Jordi Reig https://github.com/jordireig
+- [Jordi Petit](https://github.com/jordi-petit)
+- [Cristina Raluca](https://github.com/ralucado)
+- [Jordi Reig](https://github.com/jordireig)
 
 
-# License
+## License
 
-[Apache License 2.0](https://raw.githubusercontent.com/jutge-org/jutge-python/master/LICENSE.txt)
+Apache License 2.0
