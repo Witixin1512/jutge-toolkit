@@ -219,8 +219,8 @@ def clean_files(forced=False):
     print()
 
     if not forced:
-        answer = input("Are you sure? [Y/n]: ")
-        if answer != 'Y': return
+        answer = input("Are you sure? (Type yes to confirm): ")
+        if answer != 'yes': return
 
     print("\nCleaning problem...")
     for elem in removed_list:

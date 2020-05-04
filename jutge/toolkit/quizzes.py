@@ -16,11 +16,13 @@ import argparse
 from colorama import init, Fore, Style
 
 def error(title, reason):
-    raise Exception('--- ERROR in question '+str(title)+' --- '+str(reason))
+    raise Exception(Style.BRIGHT + Fore.RED + '--- ERROR in question ' + str(title) + ' --- ' + str(reason) + Style.RESET_ALL)
+
+def warning(reason):
+    print(Fore.YELLOW + '--- WARNING --- ' + str(reason) + Style.RESET_ALL)
+
 
 # function to build Single Choice questions
-
-
 def build_sc(output, title):
     # make sure choices are provided
     if not output.get("choices", False):
@@ -98,8 +100,6 @@ def build_o(output, title):
     return output
 
 # function to build FillIn questions
-
-
 def build_fi(output, title):
     # check non empty context
     context = output.get("context", False)
@@ -193,7 +193,7 @@ def build_m(output, title):
 
 # function to build Open Questions
 def build_oq(output, title):
-    # this is always good i guess
+    # this is always good I guess
     return output
 
 
@@ -269,6 +269,18 @@ def make_quiz(seed):
     if quiz.get('shuffle', True):
         random.shuffle(quiz['questions'])
 
+    sample = quiz.get('sample', None)
+    if sample != None:
+        if sample <= 0:
+            print(Style.BRIGHT + Fore.RED + '--- ERROR --- Sample number must be a natural number bigger than 0!' + Style.RESET_ALL)
+            sys.exit(0)
+        else:
+            question_num = len(quiz['questions'])
+            if sample <= question_num:
+                quiz['questions'] = quiz['questions'][:-question_num+sample]
+            else:
+                warning('Sample number is bigger than the number of questions! All questions will be used.')
+
     quiz['seed'] = seed
     quiz['time-generation'] = time.ctime()  # !!! posar format YYYY-MM-DD HH:MM:SS
 
@@ -312,10 +324,13 @@ def main():
     else:
         seed = args[0]
 
-    for dir in next(os.walk('.'))[1]:
-        os.chdir(dir)
+    if 'quiz.yml' in os.listdir('.'):
         make_quiz(seed)
-        os.chdir('..')
+    else:
+        for dir in next(os.walk('.'))[1]:
+            os.chdir(dir)
+            make_quiz(seed)
+            os.chdir('..')
 
 
 if __name__ == '__main__':
