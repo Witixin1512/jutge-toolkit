@@ -50,9 +50,6 @@ setup(
     ]
 )
 
-# post-install (i have not tested it with pypi)
-system('jutge-install-vinga')
-
 
 # Steps to try new version:
 # -------------------------

@@ -12,10 +12,22 @@ make all necessary files for problems in
 
 ## Installation
 
-Install the toolkit with `pip3 install jutge-toolkit`. You can upgrade it to the latest version with `pip3 install --upgrade jutge-toolkit`. If you want to uninstall it, use `pip3 uninstall jutge-toolkit`.
+1. Install the toolkit with `pip3 install jutge-toolkit`.
+2. Install `jutge-vinga` with `jutge-install-vinga` (requires root access).
 
 **Note:** In order to use the toolkit, you need to have its external dependencies
-installed: LaTeX and various compilers.
+installed: Docker, LaTeX and various compilers.
+
+
+## Upgrade
+
+You can upgrade to the latest version with `pip3 install --upgrade jutge-toolkit`.
+ 
+
+## Uninstall
+
+If you want to uninstall the package, use `pip3 uninstall jutge-toolkit`.
+
 
 
 ## Usage
