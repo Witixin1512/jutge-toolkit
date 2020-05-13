@@ -2,6 +2,7 @@
 # coding=utf-8
 
 from setuptools import setup
+from os import system
 
 version = "2.2.0"
 
@@ -45,8 +46,13 @@ setup(
     scripts=[
         'scripts/jutge-run',
         'scripts/jutge-submit',
+        'scripts/jutge-install-vinga',
     ]
 )
+
+# post-install (i have not tested it with pypi)
+system('jutge-install-vinga')
+
 
 # Steps to try new version:
 # -------------------------
