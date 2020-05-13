@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-import os
 from setuptools import setup
-from glob import glob
 
-
-version = "2.1.0"
-
+version = "2.2.0"
 
 setup(
     name='jutge-toolkit',
@@ -43,10 +39,14 @@ setup(
             'jutge-make-problem=jutge.toolkit:problems.main',
             'jutge-make-quiz=jutge.toolkit:quizzes.main',
             'jutge-compilers=jutge.toolkit:compilers.main',
+            'jutge-start=jutge.toolkit:start.main',
         ]
-    }
+    },
+    scripts=[
+        'scripts/jutge-run',
+        'scripts/jutge-submit',
+    ]
 )
-
 
 # Steps to try new version:
 # -------------------------

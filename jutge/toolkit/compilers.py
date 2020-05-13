@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
+# coding=utf-8
 
+import glob
+import logging
 import os
+import signal
+import subprocess
 import sys
 import time
-import subprocess
-import signal
-import logging
-import math
-import glob
-import codecs
 import timeit
-from colorama import init, Fore, Style
 
+from colorama import Fore, Style
 from jutge.toolkit import util
 
 # Maximum time to compile
@@ -20,83 +19,83 @@ max_compilation_time = 30
 # List of available compilers (will be filled)
 compilers = []
 
+
 # Exceptions:
 
 
-class CompilationTooLong (Exception):
+class CompilationTooLong(Exception):
     pass
 
 
-class ExecutionError (Exception):
+class ExecutionError(Exception):
     pass
 
 
-class CompilationError (Exception):
+class CompilationError(Exception):
     pass
 
 
 class Compiler:
-
-    '''Compiler base class (abstract).'''
+    """Compiler base class (abstract)."""
 
     def __init__(self, handler, name):
         self.handler = handler
         self.name = name
 
     def name(self):
-        '''Returns the compiler name.'''
+        """Returns the compiler name."""
         raise Exception('Abstract method')
 
     def id(self):
-        '''Returns the compiler id (automatically computed from its class name).'''
+        """Returns the compiler id (automatically computed from its class name)."""
         return self.__class__.__name__.replace('Compiler_', '').replace('XX', '++')
 
     def type(self):
-        '''Returns the compiler type (compiler, interpreter, ...).'''
+        """Returns the compiler type (compiler, interpreter, ...)."""
         raise Exception('Abstract method')
 
     def warning(self):
-        '''Returns some warning associated to the compiler.'''
+        """Returns some warning associated to the compiler."""
         return ""
 
     def executable(self):
-        '''Returns the file name of the resulting "executable".'''
+        """Returns the file name of the resulting "executable"."""
         raise Exception('Abstract method')
 
     def prepare_execution(self, ori):
-        '''Copies the necessary files from ori to . to prepare the execution.'''
+        """Copies the necessary files from ori to . to prepare the execution."""
         raise Exception('Abstract method')
 
     def language(self):
-        '''Returns the language name.'''
+        """Returns the language name."""
         raise Exception('Abstract method')
 
     def version(self):
-        '''Returns the version of this compiler.'''
+        """Returns the version of this compiler."""
         raise Exception('Abstract method')
 
     def flags1(self):
-        '''Returns flags for the first compilation.'''
+        """Returns flags for the first compilation."""
         raise Exception('Abstract method')
 
     def flags2(self):
-        '''Returns flags for the second compilation (if needed).'''
+        """Returns flags for the second compilation (if needed)."""
         raise Exception('Abstract method')
 
     def extension(self):
-        '''Returns extension of the source files (without dot).'''
+        """Returns extension of the source files (without dot)."""
         raise Exception('Abstract method')
 
     def compile(self):
-        '''Doc missing.'''
+        """Doc missing."""
         raise Exception('Abstract method')
 
     def execute(self, tst, correct, iterations=1):
-        '''Doc missing.'''
+        """Doc missing."""
         raise Exception('Abstract method')
 
     def execute_compiler(self, cmd):
-        '''Executes the command cmd, but controlling the execution time.'''
+        """Executes the command cmd, but controlling the execution time."""
         pid = os.fork()
         if pid == 0:
             # Child
@@ -112,7 +111,8 @@ class Compiler:
 
             if error or len(result) != 0:
                 if len(result) != 0: print('\n' + result.decode('utf-8').strip() + '\n')
-                print(Style.BRIGHT + Fore.RED + 'Compilation error! ' + Style.NORMAL + 'Please check ' + self.name + '.' + self.extension() + ' and try again.' + Style.RESET_ALL)
+                print(
+                    Style.BRIGHT + Fore.RED + 'Compilation error! ' + Style.NORMAL + 'Please check ' + self.name + '.' + self.extension() + ' and try again.' + Style.RESET_ALL)
                 os._exit(1)
 
             if util.file_exists('program.exe'):
@@ -135,7 +135,7 @@ class Compiler:
             raise CompilationTooLong
 
     def get_version(self, cmd, lin):
-        '''Private method to get a particular line from a command output.'''
+        """Private method to get a particular line from a command output."""
         return subprocess.getoutput(cmd).split('\n')[lin].strip()
 
     def info(self):
@@ -152,8 +152,7 @@ class Compiler:
         }
 
 
-class Compiler_GCC (Compiler):
-
+class Compiler_GCC(Compiler):
     compilers.append('GCC')
 
     def name(self):
@@ -188,14 +187,15 @@ class Compiler_GCC (Compiler):
         else:
             ext = 'c.out'
 
-        '''func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))'''
+        """func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))"""
         func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
 
     def compile(self):
-        if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
+        if 'source_modifier' in self.handler and (
+                self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             return self.compile_no_main()
         else:
             return self.compile_normal()
@@ -218,7 +218,7 @@ class Compiler_GCC (Compiler):
         ori = util.read_file('modified.c')
         main = util.read_file('main.c')
         util.write_file('modified.c',
-                        '''
+                        """
 #define main main__3
 
 %s
@@ -234,7 +234,7 @@ int main() {
     return main__2();
 }
 
-''' % (ori, main))
+""" % (ori, main))
 
         # Compile modified program
         util.del_file(self.executable())
@@ -257,8 +257,7 @@ int main() {
             return False
 
 
-class Compiler_GXX (Compiler):
-
+class Compiler_GXX(Compiler):
     compilers.append('GXX')
 
     def name(self):
@@ -290,19 +289,19 @@ class Compiler_GXX (Compiler):
     def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end = '')
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end='')
         else:
             ext = 'cc.out'
 
-
-        '''func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))'''
+        """func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))"""
         func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
 
     def compile(self):
-        if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
+        if 'source_modifier' in self.handler and (
+                self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             return self.compile_no_main()
         else:
             return self.compile_normal()
@@ -325,7 +324,7 @@ class Compiler_GXX (Compiler):
         ori = util.read_file('modified.cc')
         main = util.read_file('main.cc')
         util.write_file('modified.cc',
-                        '''
+                        """
 #define main main__3
 
 %s
@@ -341,7 +340,7 @@ int main() {
     return main__2();
 }
 
-''' % (ori, main))
+""" % (ori, main))
 
         # Compile modified program
         util.del_file(self.executable())
@@ -364,8 +363,7 @@ int main() {
             return False
 
 
-class Compiler_P1XX (Compiler_GXX):
-
+class Compiler_P1XX(Compiler_GXX):
     compilers.append('P1XX')
 
     def flags1(self):
@@ -375,8 +373,7 @@ class Compiler_P1XX (Compiler_GXX):
         return 'GNU C++ Compiler with extra flags for beginners'
 
 
-class Compiler_GXX11 (Compiler_GXX):
-
+class Compiler_GXX11(Compiler_GXX):
     compilers.append('GXX11')
 
     def name(self):
@@ -389,8 +386,7 @@ class Compiler_GXX11 (Compiler_GXX):
         return '-D_JUDGE_ -DNDEBUG -O2 -std=c++11'
 
 
-class Compiler_GXX17 (Compiler_GXX):
-
+class Compiler_GXX17(Compiler_GXX):
     compilers.append('GXX17')
 
     def name(self):
@@ -403,8 +399,7 @@ class Compiler_GXX17 (Compiler_GXX):
         return '-D_JUDGE_ -DNDEBUG -O2 -std=c++17'
 
 
-class Compiler_GHC (Compiler):
-
+class Compiler_GHC(Compiler):
     compilers.append('GHC')
 
     def name(self):
@@ -434,15 +429,14 @@ class Compiler_GHC (Compiler):
     def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end = '')
+            print("./%s < %s.inp > %s.%s" % (self.executable(), tst, tst, ext), end='')
         else:
             ext = 'hs.out'
 
-
-        '''func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))'''
+        """func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))"""
         func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
 
     def compile(self):
@@ -470,11 +464,11 @@ class Compiler_GHC (Compiler):
         ori = util.read_file('modified.hs')
         main = util.read_file('main.hs')
         util.write_file('modified.hs',
-                        '''
+                        """
 %s
 
 %s
-''' % (ori, main))
+""" % (ori, main))
 
         util.del_file(self.executable())
         try:
@@ -491,8 +485,7 @@ class Compiler_GHC (Compiler):
         return util.file_exists(self.executable())
 
 
-class Compiler_RunHaskell (Compiler):
-
+class Compiler_RunHaskell(Compiler):
     compilers.append('RunHaskell')
 
     def name(self):
@@ -528,9 +521,9 @@ class Compiler_RunHaskell (Compiler):
 
         self.compile_work(tst)
 
-        '''func.system("runhaskell work.hs > %s.%s" % (tst, ext))'''
+        """func.system("runhaskell work.hs > %s.%s" % (tst, ext))"""
         func = 'import os; os.system("runhaskell work.hs > %s.%s")' % (tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
 
         util.del_file('work.hs')
 
@@ -590,8 +583,7 @@ class Compiler_RunHaskell (Compiler):
             return False
 
 
-class Compiler_RunPython (Compiler):
-
+class Compiler_RunPython(Compiler):
     compilers.append('RunPython')
 
     def name(self):
@@ -639,9 +631,9 @@ py_compile.compile(sys.argv[1])
             ext = 'py.out'
 
         if self.compile_with(tst + ".inp"):
-            '''func.system("python3 %s.py > %s.%s" % (self.name, tst, ext))'''
+            """func.system("python3 %s.py > %s.%s" % (self.name, tst, ext))"""
             func = 'import os; os.system("python3 %s.py > %s.%s")' % (self.name, tst, ext)
-            time = timeit.timeit(func, number=iterations)/iterations
+            time = timeit.timeit(func, number=iterations) / iterations
             util.del_dir('__pycache__')
             return time
         else:
@@ -678,8 +670,7 @@ py_compile.compile(sys.argv[1])
         return False
 
 
-class Compiler_JDK (Compiler):
-
+class Compiler_JDK(Compiler):
     compilers.append('JDK')
 
     def name(self):
@@ -735,11 +726,10 @@ class WrapperMain {
         else:
             ext = 'java.out'
 
-        '''func.system("java Main < %s.inp > %s.%s" % (tst, tst, ext))'''
+        """func.system("java Main < %s.inp > %s.%s" % (tst, tst, ext))"""
         func = 'import os; os.system("java Main < %s.inp > %s.%s")' % (tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
-
 
     def compile(self):
         if 'source_modifier' in self.handler and self.handler['source_modifier'] == 'no_main':
@@ -785,8 +775,7 @@ class WrapperMain {
         return util.file_exists('Main.class')
 
 
-class Compiler_Python3 (Compiler):
-
+class Compiler_Python3(Compiler):
     compilers.append('Python3')
 
     def name(self):
@@ -827,7 +816,8 @@ py_compile.compile(sys.argv[1])
         util.del_file('py3c.py')
 
     def execute(self, tst, correct, iterations=1):
-        if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
+        if 'source_modifier' in self.handler and (
+                self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             util.copy_file(self.name + '.py', 'modified.py')
             ori = util.read_file(self.name + '.py')
             main = util.read_file('main.py')
@@ -843,9 +833,9 @@ py_compile.compile(sys.argv[1])
         else:
             ext = 'py.out'
 
-        '''func.system("python3 %s < %s.inp > %s.%s" % (exec, tst, tst, ext))'''
+        """func.system("python3 %s < %s.inp > %s.%s" % (exec, tst, tst, ext))"""
         func = 'import os; os.system("python3 %s < %s.inp > %s.%s")' % (exec, tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
 
         util.del_file('modified.py')
         util.del_dir('__pycache__')
@@ -853,7 +843,8 @@ py_compile.compile(sys.argv[1])
         return time
 
     def compile(self):
-        if 'source_modifier' in self.handler and (self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
+        if 'source_modifier' in self.handler and (
+                self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             return self.compile_no_main()
         else:
             return self.compile_normal()
@@ -897,8 +888,7 @@ py_compile.compile(sys.argv[1])""")
         return True
 
 
-class Compiler_R (Compiler):
-
+class Compiler_R(Compiler):
     compilers.append('R')
 
     def name(self):
@@ -932,9 +922,9 @@ class Compiler_R (Compiler):
         else:
             ext = 'R.out'
 
-        '''func.system("Rscript solution.R < %s.inp > %s.%s" % (tst, tst, ext))'''
+        """func.system("Rscript solution.R < %s.inp > %s.%s" % (tst, tst, ext))"""
         func = 'import os; os.system("Rscript solution.R < %s.inp > %s.%s")' % (tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
 
     def compile(self):
@@ -1006,8 +996,7 @@ checkUsage(wrapper_R)
         return True
 
 
-class Compiler_PRO2 (Compiler):
-
+class Compiler_PRO2(Compiler):
     compilers.append('PRO2')
 
     def name(self):
@@ -1041,10 +1030,10 @@ class Compiler_PRO2 (Compiler):
         else:
             ext = 'pro2.out'
 
-        '''func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))'''
+        """func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))"""
         func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
 
     def compile(self):
@@ -1080,8 +1069,7 @@ class Compiler_PRO2 (Compiler):
             return False
 
 
-class Compiler_MakePRO2 (Compiler):
-
+class Compiler_MakePRO2(Compiler):
     compilers.append('MakePRO2')
 
     def name(self):
@@ -1159,24 +1147,25 @@ class Compiler_MakePRO2 (Compiler):
         else:
             ext = 'makepro2.out'
 
-        '''func.system("./%s < %s.inp > %s.%s" %
-                    (self.executable(), tst, tst, ext))'''
+        """func.system("./%s < %s.inp > %s.%s" %
+                    (self.executable(), tst, tst, ext))"""
         func = 'import os; os.system("./%s < %s.inp > %s.%s")' % (self.executable(), tst, tst, ext)
-        time = timeit.timeit(func, number=iterations)/iterations
+        time = timeit.timeit(func, number=iterations) / iterations
         return time
+
 
 ################################################################################
 
 
 def compiler(cpl, handler=None, name=None):
-    '''Returns a compiler for cpl.'''
+    """Returns a compiler for cpl."""
 
     cpl = cpl.replace('++', 'XX')
     return eval('Compiler_%s(handler, name)' % cpl)
 
 
 def compiler_extensions(handler_compiler):
-    '''Returns the info on all the compilers.'''
+    """Returns the info on all the compilers."""
 
     r = {}
     for x in compilers:
@@ -1190,7 +1179,7 @@ def compiler_extensions(handler_compiler):
 
 
 def info():
-    '''Returns the info on all the compilers.'''
+    """Returns the info on all the compilers."""
 
     r = {}
     for x in compilers:
@@ -1199,7 +1188,7 @@ def info():
 
 
 def main():
-    '''Prints the info on all the compilers in YML format.'''
+    """Prints the info on all the compilers in YML format."""
     util.print_yml(info())
 
 
