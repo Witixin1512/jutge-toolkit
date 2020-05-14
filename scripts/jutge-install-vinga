@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script installs the last version of jutge-vinga.
+# This script installs the lattest version of jutge-vinga.
 
 uname=`uname`
 if [ $uname == "Darwin" ]
