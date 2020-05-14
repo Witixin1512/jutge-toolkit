@@ -17,7 +17,7 @@ import subprocess
 from shutil import which
 from colorama import init, Fore, Style
 
-from . import util
+from jutge import util
 from . import compilers
 
 # ----------------------------------------------------------------------------

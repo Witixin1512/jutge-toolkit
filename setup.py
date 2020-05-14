@@ -4,12 +4,16 @@
 from setuptools import setup
 from os import system
 
-version = "2.3.0"
+version = "2.4.0"
 
 setup(
     name='jutge-toolkit',
     packages=['jutge.toolkit'],
-    install_requires=['pyyaml>=5.1', 'colorama'],
+    install_requires=[
+        'jutge-util',
+        'pyyaml>=5.1',
+        'colorama',
+    ],
     version=version,
     description='Toolkit to make problems for Jutge.org',
     long_description='Toolkit to make problems for Jutge.org',
@@ -19,19 +23,6 @@ setup(
     download_url='https://github.com/jutge-org/jutge-toolkit/tarball/{}'.format(version),
     keywords=['jutge', 'jutge.org', 'education', 'problems', 'quizzes', 'toolkit'],
     license='Apache',
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: Education',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Education',
-    ],
     zip_safe=False,
     include_package_data=True,
     setup_requires=['setuptools'],

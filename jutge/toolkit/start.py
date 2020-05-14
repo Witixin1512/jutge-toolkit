@@ -11,7 +11,7 @@ import os
 import resource
 import sys
 
-from . import util
+from jutge import util
 
 
 def main():

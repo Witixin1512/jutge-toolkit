@@ -11,7 +11,7 @@ import time
 import timeit
 
 from colorama import Fore, Style
-from jutge.toolkit import util
+from jutge import util
 
 # Maximum time to compile
 max_compilation_time = 30
