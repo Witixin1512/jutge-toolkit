@@ -110,7 +110,7 @@ def make_corrects(com, iterations=1):
         if handler["handler"] == "graphic":
             os.rename("output.png", tst + ".cor")
         outsize = os.path.getsize(tst + ".cor")
-        print(Style.DIM + '\t\ttime: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
+        print(Style.DIM + '\ntime: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
 
 # ----------------------------------------------------------------------------
 # Verify program
@@ -184,7 +184,7 @@ def verify_program(program, correct_extension='', iterations=1):
                 msg = "OK"
                 util.del_file(tst + ext + ".out")
             print((Fore.GREEN if msg == 'OK' else Fore.RED) +
-                  "%s.inp:\t\t%s\t\ttime: %f\t\tsize: %s" %
+                  "%s.inp:\t\t%s\ntime: %f\t\tsize: %s" %
                   (tst, msg, time, util.convert_bytes(outsize)) + Style.RESET_ALL)
             if outsize > 2000000 and not os.path.isfile(tst + ext + ".ops"):
                 print(Fore.YELLOW + 'Warning: The output file is bigger than 2MB, you may need a .ops file for this test case.')
@@ -202,7 +202,7 @@ def clean_files(forced=False):
     removed_list = []
     for dirpath, dirnames, filenames in os.walk('.'):
         for filename in filenames:
-            if re.match('.*\.exe|.*\.cor|problem\..*\.pdf|problem\..*\.ps', filename):
+            if re.match('.*\.exe|.*\.cor|problem\..*\.pdf|problem\..*\.ps|a\.out', filename):
                 removed_list.append(dirpath + '/' + filename)
 
     if removed_list == []:
@@ -296,6 +296,7 @@ handler.yml: \verbatimtabinput{handler.yml}
 
     util.write_file("main.tex", t)
     print(Style.BRIGHT + "Generating .pdf file...   ", end=Style.RESET_ALL)
+    sys.stdout.flush()
     r = os.system("latex -interaction scrollmode main > main.err")
     if r != 0:
         os.system('cat main.err')
@@ -495,14 +496,14 @@ def main():
     # Create and configure the option parser
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options] [paths]",
-        description="Make different tasks in problem directories.",
+        description="Make different tasks in problem directories. If no arguments are specified, the script will compile the programs and generate the correct output of the problems. Then, it will check if all the possible solutions in different languages are correct. Finally it'll generate the .pdf files of the problem.",
     )
 
     parser.add_argument("--executable", help="make executable in the cwd",
                         action="store_true")
     parser.add_argument("--corrects", help="make correct files in the cwd",
                         action="store_true")
-    parser.add_argument("--prints", help="make printable files in the cwd",
+    parser.add_argument("--pdf", help="make printable files in the cwd",
                         action="store_true")
     parser.add_argument("--all", help="make executable, correct and printable files in the cwd (default)",
                         action="store_true")
@@ -523,6 +524,10 @@ def main():
 
     # Parse options with real arguments
     args, paths = parser.parse_known_args()
+    for path in paths:
+        if not os.path.isdir(path):
+            print(Fore.RED + "Some arguments you entered are invalid!" + Style.RESET_ALL)
+            sys.exit(0)
 
     # Do the work
     done = False
@@ -532,7 +537,7 @@ def main():
     if args.corrects:
         done = True
         make_corrects()
-    if args.prints:
+    if args.pdf:
         done = True
         make_prints()
     if args.all:

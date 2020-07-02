@@ -31,7 +31,7 @@ problem statement.
 
 - `--executable`: Makes the executables of the problems.
 - `--corrects `: Generates the solution files of the problems.
-- `--prints`: Creates the printable files in `.pdf` format.
+- `--pdf`: Creates the printable files in `.pdf` format.
 - `--all` : Does everything mentioned above.
 - `--recursive`: The toolkit searches recursively for problems.
 - `--list`: Lists all the problems found recursively.
