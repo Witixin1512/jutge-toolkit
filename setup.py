@@ -4,7 +4,7 @@
 from setuptools import setup
 from os import system
 
-version = '2.5.1'
+version = '2.5.2'
 
 setup(
     name='jutge-toolkit',
@@ -31,6 +31,7 @@ setup(
             'jutge-make-problem=jutge.toolkit:problems.main',
             'jutge-make-quiz=jutge.toolkit:quizzes.main',
             'jutge-compilers=jutge.toolkit:compilers.main',
+            'jutge-available-compilers=jutge.toolkit:compilers.available_compilers',
             'jutge-start=jutge.toolkit:start.main',
         ]
     },

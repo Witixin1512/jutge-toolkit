@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-# !!! Falta fer shuffle d'alguns items, ara només ho fa dels choices
-
 
 import sys
 import string

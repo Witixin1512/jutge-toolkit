@@ -13,7 +13,6 @@ import os.path
 import argparse
 import subprocess
 import re
-import subprocess
 from shutil import which
 from colorama import init, Fore, Style
 
@@ -26,14 +25,6 @@ from . import compilers
 
 home = os.path.normpath(os.path.dirname(sys.argv[0]) + "/..")
 languages = ["ca", "en", "es", "fr", "de"]
-
-cxx = "g++"
-cxxflags = " -std=c++11 -D_JUDGE_ -O2 -DNDEBUG -Wall -Wextra -Wno-sign-compare -Wshadow "
-cxxflags_fallback = " -D_JUDGE_ -O2 -DNDEBUG "
-
-cc = "gcc"
-ccflags = " -D_JUDGE_ -O2 -DNDEBUG -Wall -Wextra -Wno-sign-compare "
-ccflags_fallback = ""
 
 errors = []
 
@@ -116,6 +107,8 @@ def make_corrects(com, iterations=1):
         tst = os.path.splitext(inp)[0]
         time = com.execute(tst, True, iterations)
 
+        if handler["handler"] == "graphic":
+            os.rename("output.png", tst + ".cor")
         outsize = os.path.getsize(tst + ".cor")
         print(Style.DIM + '\t\ttime: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
 
@@ -130,7 +123,7 @@ def verify_program(program, correct_extension='', iterations=1):
     if not util.file_exists("handler.yml"):
         raise Exception("handler.yml does not exist")
     handler = util.read_yml("handler.yml")
-    if handler["handler"] != "std":
+    if handler["handler"] != "std" and handler["handler"] != "graphic":
         raise Exception("unknown handler")
 
     # compile
@@ -179,6 +172,8 @@ def verify_program(program, correct_extension='', iterations=1):
         for test in tests:
             tst = os.path.splitext(test)[0]
             time = compiler.execute(tst, False, iterations)
+            if handler["handler"] == "graphic":
+                os.rename("output.png", tst + ext + ".out")
             outsize = os.path.getsize(tst + ext + ".out")
 
             r = subprocess.call(["cmp", tst + ext + ".out", tst + ".cor"])
@@ -261,7 +256,13 @@ def make_prints_3(lang, ori):
             size = subprocess.getoutput(
                 "identify -format '(%%w$\\\\times$%%h)' %s.cor" % jj)
             graphic = "[%s]" % size
-            os.system("convert %s.cor %s.cor.eps" % (jj, jj))
+            r = os.system("convert %s.cor %s.cor.eps" % (jj, jj))
+            if r != 0:
+                print(Fore.RED + "ImageMagick error!", end = '')
+                if r == 256:
+                    print(" You must change it's security policy to be able to convert the images to EPS.", end = '')
+                print(Style.RESET_ALL)
+                sys.exit(0)
 
         sample2 += r"\SampleTwoColInputOutput%s{%s}{%s}" % (graphic, jj, num)
         sample1 += r"\SampleOneColInputOutput%s{%s}{%s}" % (graphic, jj, num)
@@ -294,7 +295,6 @@ handler.yml: \verbatimtabinput{handler.yml}
     """ % (lang, sample2, sample1, lang, lang, src, dat, lang, lang, scores)
 
     util.write_file("main.tex", t)
-
     print(Style.BRIGHT + "Generating .pdf file...   ", end=Style.RESET_ALL)
     r = os.system("latex -interaction scrollmode main > main.err")
     if r != 0:
@@ -550,18 +550,15 @@ def main():
         make_list(paths)
     if args.verify:
         done = True
-        if args.verify == None:
-            verify_program("solution", iterations=args.iterations)
-        else:
-            for d in next(os.walk('.'))[1]:
-                os.chdir(d)
-                if args.verify in ' '.join(glob.glob('*')):
-                    print(Style.BRIGHT + "Working on " +
-                          os.getcwd() + "..." + Style.RESET_ALL)
-                    print()
-                    verify_program(args.verify, iterations=args.iterations)
-                os.chdir('..')
-
+        verify_program(args.verify, iterations=args.iterations)
+        for d in next(os.walk('.'))[1]:
+            os.chdir(d)
+            if args.verify in ' '.join(glob.glob('*')):
+                print(Style.BRIGHT + "Working on " +
+                      os.getcwd() + "..." + Style.RESET_ALL)
+                print()
+                verify_program(args.verify, iterations=args.iterations)
+            os.chdir('..')
     if args.clean:
         done = True
         if args.force:

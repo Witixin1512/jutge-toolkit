@@ -5,7 +5,7 @@
 
 ## Documentation
 
-The `jutge-toolit` toolkit provides command line tools to
+The `jutge-toolkit` toolkit provides command line tools to
 make all necessary files for problems in
 [Jutge.org](https://jutge.org/).
 
@@ -22,7 +22,7 @@ installed: Docker, LaTeX and various compilers.
 ## Upgrade
 
 You can upgrade to the latest version with `pip3 install --upgrade jutge-toolkit`.
- 
+
 
 ## Uninstall
 

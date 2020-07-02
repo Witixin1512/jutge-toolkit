@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# This script is meant to be used inside the container
+# in order to install the latest version of jutge-vinga.
+
+
 if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then
     echo "This script installs the last version of jutge-vinga."
     exit 0

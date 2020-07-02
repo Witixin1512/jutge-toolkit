@@ -1157,6 +1157,21 @@ class Compiler_MakePRO2(Compiler):
 ################################################################################
 
 
+def available_compilers():
+    available_list = []
+    supported_list = info()
+    for k, v in supported_list.items():
+            if "not found" not in v["version"]:
+                available_list.append(k)
+
+    if available_list != {}: print("Available compilers:", end = ' ')
+    for compiler in available_list:
+        print(compiler, end = '')
+        if compiler == available_list[-2]: print(' and ', end = '')
+        elif compiler != available_list[-1]: print(', ', end = '')
+        else: print()
+
+
 def compiler(cpl, handler=None, name=None):
     """Returns a compiler for cpl."""
 
