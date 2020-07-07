@@ -86,6 +86,18 @@ def make_executable():
     print()
     return com
 
+def make_executable_rec():
+    """Makes the executable files for the problem in the cwd"""
+
+    for d in next(os.walk('.'))[1]:
+        if d in languages:
+            print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
+            os.chdir(d)
+            make_executable()
+            os.chdir("..")
+        else:
+            print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+
 # ----------------------------------------------------------------------------
 # Make correct files
 # ----------------------------------------------------------------------------
@@ -110,7 +122,27 @@ def make_corrects(com, iterations=1):
         if handler["handler"] == "graphic":
             os.rename("output.png", tst + ".cor")
         outsize = os.path.getsize(tst + ".cor")
-        print(Style.DIM + '\ntime: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
+
+        try:
+            if 'Run' not in handler['compilers']:
+                print()
+        except Exception:
+            print()
+
+        print(Style.DIM + 'time: %f\t\tsize: %s' % (time, util.convert_bytes(outsize)) + Style.RESET_ALL)
+
+
+def make_corrects_rec():
+    """Makes the correct files for the problem in the cwd"""
+
+    for d in next(os.walk('.'))[1]:
+        if d in languages:
+            print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
+            os.chdir(d)
+            make_corrects()
+            os.chdir("..")
+        else:
+            print(Style.DIM + "skipping " + d + Style.RESET_ALL)
 
 # ----------------------------------------------------------------------------
 # Verify program
@@ -352,6 +384,7 @@ def make_prints():
                 os.chdir("..")
             else:
                 print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+            print()
 
 
 # ----------------------------------------------------------------------------
@@ -379,6 +412,7 @@ def make_all(iterations=1):
                       os.getcwd() + "..." + Style.RESET_ALL)
                 print()
                 com = make_executable()
+                print()
                 make_corrects(com)
                 print()
                 verify_program("solution", com.extension(), iterations)
@@ -419,8 +453,8 @@ def make_recursive_2():
         if util.file_exists("solution.cc") or util.file_exists("solution.hs"):
             try:
                 if 1:
-                    make_executable()
-                    make_corrects()
+                    com = make_executable()
+                    make_corrects(com)
                     make_prints()
             except Exception as e:
                 print("\a")
@@ -523,20 +557,17 @@ def main():
                         action="store_true", default=False)
 
     # Parse options with real arguments
-    args, paths = parser.parse_known_args()
-    for path in paths:
-        if not os.path.isdir(path):
-            print(Fore.RED + "Some arguments you entered are invalid!" + Style.RESET_ALL)
-            sys.exit(0)
+    args = parser.parse_args()
 
     # Do the work
     done = False
     if args.executable:
         done = True
-        make_executable()
+        make_executable_rec()
     if args.corrects:
         done = True
-        make_corrects()
+        com = make_executable()
+        make_corrects_rec(com)
     if args.pdf:
         done = True
         make_prints()
@@ -545,14 +576,10 @@ def main():
         make_all(args.iterations)
     if args.recursive:
         done = True
-        if paths == []:
-            paths = (".",)
-        make_recursive(paths)
+        make_recursive(".")
     if args.list:
         done = True
-        if paths == []:
-            paths = (".",)
-        make_list(paths)
+        make_list(".")
     if args.verify:
         done = True
         verify_program(args.verify, iterations=args.iterations)

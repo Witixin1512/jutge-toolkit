@@ -458,6 +458,7 @@ class Compiler_GHC(Compiler):
         util.del_file(self.name + '.hi')
         util.del_file(self.name + '.o')
         util.file_exists(self.executable())
+        return True
 
     def compile_no_main(self):
         util.copy_file(self.name + '.hs', 'modified.hs')
@@ -515,7 +516,7 @@ class Compiler_RunHaskell(Compiler):
     def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            print("runhaskell work.hs > %s.%s" % (tst, ext), end='')
+            print("runhaskell work.hs > %s.%s" % (tst, ext))
         else:
             ext = 'hs.out'
 
@@ -548,6 +549,7 @@ class Compiler_RunHaskell(Compiler):
         util.del_file("work.hi")
         util.del_file("work.hs")
         util.del_file("work.o")
+        return True
 
     def compile_work(self, tst):
         f = open("extra.hs", "w")
@@ -626,7 +628,7 @@ py_compile.compile(sys.argv[1])
     def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
-            print("python3 %s.py > %s.%s" % (self.name, tst, ext), end='')
+            print("python3 %s.py > %s.%s" % (self.name, tst, ext))
         else:
             ext = 'py.out'
 
