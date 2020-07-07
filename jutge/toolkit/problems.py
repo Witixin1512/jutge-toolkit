@@ -89,14 +89,19 @@ def make_executable():
 def make_executable_rec():
     """Makes the executable files for the problem in the cwd"""
 
-    for d in next(os.walk('.'))[1]:
-        if d in languages:
-            print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
-            os.chdir(d)
-            make_executable()
-            os.chdir("..")
-        else:
-            print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+    handler = sorted(glob.glob("handler.yml"))
+    if handler:
+        make_executable()
+    else:
+        for d in next(os.walk('.'))[1]:
+            if d in languages:
+                print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
+                os.chdir(d)
+                make_executable()
+                os.chdir("..")
+            else:
+                print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+            print()
 
 # ----------------------------------------------------------------------------
 # Make correct files
@@ -135,14 +140,21 @@ def make_corrects(com, iterations=1):
 def make_corrects_rec():
     """Makes the correct files for the problem in the cwd"""
 
-    for d in next(os.walk('.'))[1]:
-        if d in languages:
-            print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
-            os.chdir(d)
-            make_corrects()
-            os.chdir("..")
-        else:
-            print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+    handler = sorted(glob.glob("handler.yml"))
+    if handler:
+        com = make_executable()
+        make_corrects(com)
+    else:
+        for d in next(os.walk('.'))[1]:
+            if d in languages:
+                print(Style.DIM + os.getcwd() + ' ' + d + Style.RESET_ALL)
+                os.chdir(d)
+                com = make_executable()
+                make_corrects(com)
+                os.chdir("..")
+            else:
+                print(Style.DIM + "skipping " + d + Style.RESET_ALL)
+            print()
 
 # ----------------------------------------------------------------------------
 # Verify program
@@ -566,8 +578,7 @@ def main():
         make_executable_rec()
     if args.corrects:
         done = True
-        com = make_executable()
-        make_corrects_rec(com)
+        make_corrects_rec()
     if args.pdf:
         done = True
         make_prints()
