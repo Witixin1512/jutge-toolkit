@@ -195,8 +195,8 @@ def verify_program(program, correct_extension='', iterations=1):
             available_list.append([solution, com])
 
     print()
-    unsupported_list = [x for x in solution_list if x not in [
-        y[0] for y in available_list]]
+    unsupported_list = [x for x in solution_list if (x not in [
+        y[0] for y in available_list] and x[-1] != '~' and not x.endswith('bak'))]
     if unsupported_list != []:
         print(Fore.YELLOW + "NOTICE: The following solutions are still not supported and will NOT be verified: ", end='')
         for elem in unsupported_list:
