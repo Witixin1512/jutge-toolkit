@@ -15,7 +15,7 @@ umask 077
 mkdir $name
 cd $name
 tar xf -
-chmod -R u+rwX, go-rwx .
+chmod -R u+rwX,go-rwx .
 jutge-start $name
 cd correction
 tar czf - *
