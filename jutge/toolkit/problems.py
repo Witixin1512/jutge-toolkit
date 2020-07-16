@@ -28,6 +28,8 @@ languages = ["ca", "en", "es", "fr", "de"]
 
 errors = []
 
+tex = True
+
 
 # ----------------------------------------------------------------------------
 # Check for missing dependencies
@@ -40,6 +42,12 @@ def check_dependencies():
     for program in check_list:
         if which(program) is None:
             missing_list.append(program)
+
+    if 'tex' in missing_list:
+        print(Fore.YELLOW + 'Warning: tex is not installed, .pdf files will not be generated!\n' + Style.RESET_ALL)
+        global tex
+        tex = False
+        missing_list.remove('tex')
 
     if missing_list:
         print(Fore.RED + 'The following dependencies are missing, please install them and try again: ', end='')
@@ -412,10 +420,11 @@ def make_all(iterations=1):
         make_corrects(com)
         print()
         verify_program("solution", com.extension(), iterations)
-        for pbm in pbms:
-            lang = pbm.replace("problem.", "").replace(".tex", "")
-            print()
-            make_prints2(lang)
+        if tex:
+            for pbm in pbms:
+                lang = pbm.replace("problem.", "").replace(".tex", "")
+                print()
+                make_prints2(lang)
     else:
         for d in next(os.walk('.'))[1]:
             if d in languages:
@@ -428,8 +437,9 @@ def make_all(iterations=1):
                 make_corrects(com)
                 print()
                 verify_program("solution", com.extension(), iterations)
-                print()
-                make_prints2(d)
+                if tex:
+                    print()
+                    make_prints2(d)
                 os.chdir("..")
                 print()
             else:
@@ -467,7 +477,8 @@ def make_recursive_2():
                 if 1:
                     com = make_executable()
                     make_corrects(com)
-                    make_prints()
+                    if tex:
+                        make_prints()
             except Exception as e:
                 print("\a")
                 print(e)
@@ -581,7 +592,8 @@ def main():
         make_corrects_rec()
     if args.pdf:
         done = True
-        make_prints()
+        if tex:
+            make_prints()
     if args.all:
         done = True
         make_all(args.iterations)

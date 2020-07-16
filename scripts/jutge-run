@@ -17,7 +17,7 @@ EOF
     exit
 fi
 
-for jutge_version in jutge-server jutge-full jutge-lite jutge-test
+for jutge_version in jutge-full jutge-server jutge-lite jutge-test
 do
     ver="$(docker image ls | awk '{print $1}' | grep $jutge_version)"
     if [ "$ver" ]
@@ -34,7 +34,7 @@ fi
 
 if [ $1 == 'jutge-submit' ]
 then
-    docker run --rm -i $selected_version $@
+    docker run --rm -i --network none --memory=1g --cpus=1 $selected_version $@
 elif [ $1 == 'bash' ]
 then
     docker run --rm -it -v $(pwd):/home/worker $selected_version $@
