@@ -7,7 +7,6 @@ read version
 
 perl -p -i -e "s/^version = .*/version = '$version'/" setup.py
 
-git add *
 git commit -a
 git push
 git tag $version -m "Release $version"

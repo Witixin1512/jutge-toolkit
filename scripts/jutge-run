@@ -17,7 +17,7 @@ EOF
     exit
 fi
 
-for jutge_version in jutge-full jutge-server jutge-lite jutge-test
+for jutge_version in jutge-server jutge-full jutge-lite jutge-test
 do
     ver="$(docker image ls | awk '{print $1}' | grep $jutge_version)"
     if [ "$ver" ]
