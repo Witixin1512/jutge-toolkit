@@ -39,5 +39,5 @@ elif [ $1 == 'bash' ]
 then
     docker run --rm -it -v $(pwd):/home/worker $selected_version $@
 else
-    docker run --rm -t -v $(pwd):/home/worker $selected_version $@
+    docker run --rm -it -v $(pwd):/home/worker -u $(id -u):$(id -g) $selected_version $@
 fi
