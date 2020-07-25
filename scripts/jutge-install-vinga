@@ -14,7 +14,7 @@ uname=`uname`
 
 if [ $uname == "Linux" ] ; then
 
-    sudo wget -O /usr/local/bin/jutge-vinga https://jpetit.jutge.org/jutge-vinga-linux
+    sudo wget -O /usr/local/bin/jutge-vinga https://github.com/jutge-org/jutge-vinga-bin/raw/master/jutge-vinga-linux
     sudo chown root:root /usr/local/bin/jutge-vinga
     sudo chmod +x /usr/local/bin/jutge-vinga
     sudo chmod +s /usr/local/bin/jutge-vinga
@@ -22,7 +22,7 @@ if [ $uname == "Linux" ] ; then
 
 elif [ $uname == "Darwin" ] ; then
 
-    sudo wget -O /usr/local/bin/jutge-vinga https://jpetit.jutge.org/jutge-vinga-mac
+    sudo wget -O /usr/local/bin/jutge-vinga https://github.com/jutge-org/jutge-vinga-bin/raw/master/jutge-vinga-mac
     sudo chown root:wheel /usr/local/bin/jutge-vinga
     sudo chmod +x /usr/local/bin/jutge-vinga
     sudo chmod +s /usr/local/bin/jutge-vinga
