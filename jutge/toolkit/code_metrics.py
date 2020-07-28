@@ -65,7 +65,7 @@ def main():
 	# call commentedCodeDetector.py
 	halstead = {}
 	if extension in [".cc", ".c", ".java", ".py"]:
-		out = subprocess.getstatusoutput("%s/commented_code_detector.py -fm %s 2> /dev/null" % (bindir, program))[1]
+		out = subprocess.getstatusoutput("python3 %s/commented_code_detector.py -fm %s 2> /dev/null" % (bindir, program))[1]
 		for line in out.split("\n"):
 			key, val = map(str.strip, line.split())
 			halstead[key] = float(val)
