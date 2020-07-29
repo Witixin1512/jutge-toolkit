@@ -260,7 +260,11 @@ def check_list(thing, title, name):
         error(title, str(name) + " must be a list!")
 
 def make_quiz(seed):
-    quiz = yaml.load(open("quiz.yml"), Loader=yaml.FullLoader)
+    try:
+        quiz = yaml.load(open("quiz.yml"), Loader=yaml.FullLoader)
+    except Exception:
+        print(Fore.RED + 'No quiz was found on this folder (quiz.yml is missing)!' + Style.RESET_ALL)
+        sys.exit(0)
 
     random.seed(seed)
 

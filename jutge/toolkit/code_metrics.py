@@ -3,19 +3,13 @@
 import os
 import sys
 import json
-import subprocess
 import lizard
+import argparse
+import subprocess
 from shutil import which
 from colorama import init, Fore, Style
 
-
-program = sys.argv[1]
-output = sys.argv[2] if len(sys.argv) == 3 else None
-
-
-filename, extension = os.path.splitext(program)
 bindir = os.path.dirname(os.path.realpath(__file__))
-
 argon_installed = True
 
 # ----------------------------------------------------------------------------
@@ -51,7 +45,25 @@ def check_dependencies():
 # ----------------------------------------------------------------------------
 
 def main():
+	init()  # Start colorama
 	check_dependencies()
+
+	parser = argparse.ArgumentParser(
+		usage="%(prog)s program",
+		description="Provides measures extracted from a static inspection of the submitted code.",
+	)
+
+	# Parse options with real arguments
+	args = parser.parse_known_args()
+
+	try:
+		program = sys.argv[1]
+	except Exception:
+		print(Fore.RED + 'You must specify a program to analyze it!' + Style.RESET_ALL)
+		sys.exit(0)
+
+	filename, extension = os.path.splitext(program)
+	output = sys.argv[2] if len(sys.argv) == 3 else None
 
 	# count total number of lines
 	lines = len(open(program, "r").readlines())
