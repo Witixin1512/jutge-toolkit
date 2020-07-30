@@ -25,18 +25,18 @@ def check_dependencies():
             missing_list.append(program)
 
     if 'argon' in missing_list:
-        print(Fore.YELLOW + 'Warning: argon is not installed, you will not be able to generate code metrics for Haskell scripts!\n' + Style.RESET_ALL)
+        print(Fore.YELLOW + 'Warning: argon is not installed, you will not be able to generate code metrics for Haskell scripts!\n' + Style.RESET_ALL, file=sys.stderr)
         global argon_installed
         argon_installed = False
         missing_list.remove('argon')
 
     if missing_list:
-        print(Fore.RED + 'The following dependencies are missing, please install them and try again: ', end='')
+        print(Fore.RED + 'The following dependencies are missing, please install them and try again: ', end='', file=sys.stderr)
         for missing_dep in missing_list:
             if missing_dep != missing_list[-1]:
-                print(missing_dep, end=', ')
+                print(missing_dep, end=', ', file=sys.stderr)
             else:
-                print(missing_dep + Style.RESET_ALL)
+                print(missing_dep + Style.RESET_ALL, file=sys.stderr)
         sys.exit(0)
 
 
@@ -59,7 +59,7 @@ def main():
 	try:
 		program = sys.argv[1]
 	except Exception:
-		print(Fore.RED + 'You must specify a program to analyze it!' + Style.RESET_ALL)
+		print(Fore.RED + 'You must specify a program to analyze it!' + Style.RESET_ALL, file=sys.stderr)
 		sys.exit(0)
 
 	filename, extension = os.path.splitext(program)

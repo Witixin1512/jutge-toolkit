@@ -17,7 +17,7 @@ def error(title, reason):
     raise Exception(Style.BRIGHT + Fore.RED + '--- ERROR in question ' + str(title) + ' --- ' + str(reason) + Style.RESET_ALL)
 
 def warning(reason):
-    print(Fore.YELLOW + '--- WARNING --- ' + str(reason) + Style.RESET_ALL)
+    print(Fore.YELLOW + '--- WARNING --- ' + str(reason) + Style.RESET_ALL, file=sys.stderr)
 
 
 # function to build Single Choice questions
@@ -263,7 +263,7 @@ def make_quiz(seed):
     try:
         quiz = yaml.load(open("quiz.yml"), Loader=yaml.FullLoader)
     except Exception:
-        print(Fore.RED + 'No quiz was found on this folder (quiz.yml is missing)!' + Style.RESET_ALL)
+        print(Fore.RED + 'No quiz was found on this folder (quiz.yml is missing)!' + Style.RESET_ALL, file=sys.stderr)
         sys.exit(0)
 
     random.seed(seed)
@@ -274,7 +274,7 @@ def make_quiz(seed):
     sample = quiz.get('sample', None)
     if sample != None:
         if sample <= 0:
-            print(Style.BRIGHT + Fore.RED + '--- ERROR --- Sample number must be a natural number bigger than 0!' + Style.RESET_ALL)
+            print(Style.BRIGHT + Fore.RED + '--- ERROR --- Sample number must be a natural number bigger than 0!' + Style.RESET_ALL, file=sys.stderr)
             sys.exit(0)
         else:
             question_num = len(quiz['questions'])
