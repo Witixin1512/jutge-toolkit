@@ -45,7 +45,7 @@ For full details, please refer to the following documents:
 - [The quick start guide](documentation/quick-start.md)
 - [The common problem documentation](documentation/problems.md)
 - [The quiz problem documentation](documentation/quizzes.md)
- -[The code metrics documentation](documentation/code_metrics.md)
+- [The code metrics documentation](documentation/code_metrics.md)
 
 
 
