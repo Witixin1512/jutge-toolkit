@@ -40,7 +40,12 @@ There are four commands:
 - `jutge-available-compilers`: Outputs information on the available compilers.
 - `jutge-code-metrics`:  Provides measures extracted from a static inspection of the submitted code.
 
-For full details, please refer to the [common problem documentation](documentation/problems.md), to the [quiz problem documentation](documentation/quizzes.md) and to the [code metrics documentation](documentation/code_metrics.md).
+For full details, please refer to the following documents:
+
+- [The quick start guide](documentation/quick-start.md)
+- [The common problem documentation](documentation/problems.md)
+- [The quiz problem documentation](documentation/quizzes.md)
+ -[The code metrics documentation](documentation/code_metrics.md)
 
 
 
