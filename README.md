@@ -16,7 +16,7 @@ make all necessary files for problems in
 2. Install `jutge-vinga` with `jutge-install-vinga` (requires root access).
 
 **Note:** In order to use the toolkit, you need to have its external dependencies
-installed: Docker, LaTeX and various compilers.
+installed: Docker, LaTeX and various compilers. You only need them if required.
 
 
 ## Upgrade
@@ -29,16 +29,15 @@ You can upgrade to the latest version with `pip3 install --upgrade jutge-toolkit
 If you want to uninstall the package, use `pip3 uninstall jutge-toolkit`.
 
 
-
 ## Usage
 
-There are four commands:
+There are five main commands:
 
 - `jutge-make-problem`: Makes all the necessary files to generate a common problem.
 - `jutge-make-quiz`: Makes all the necessary files to generate a quiz problem.
 - `jutge-compilers`: Outputs information on the supported compilers.
 - `jutge-available-compilers`: Outputs information on the available compilers.
-- `jutge-code-metrics`:  Provides measures extracted from a static inspection of the submitted code.
+- `jutge-code-metrics`:  Provides measures extracted from a static inspection of a program.
 
 For full details, please refer to the following documents:
 
@@ -46,7 +45,6 @@ For full details, please refer to the following documents:
 - [The common problem documentation](documentation/problems.md)
 - [The quiz problem documentation](documentation/quizzes.md)
 - [The code metrics documentation](documentation/code_metrics.md)
-
 
 
 ## Credits
