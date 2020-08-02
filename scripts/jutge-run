@@ -32,12 +32,23 @@ then
     selected_version='jutgeorg/jutge-lite'
 fi
 
+jail="--network none --memory=1g --cpus=1"
+
 if [ $1 == 'jutge-submit' ]
 then
-    docker run --rm -i --network none --memory=1g --cpus=1 $selected_version $@
-elif [ $1 == 'bash' ]
-then
-    docker run --rm -it -v $(pwd):/home/worker $selected_version $@
+    docker run --rm -i $jail $selected_version $@
 else
-    docker run --rm -it -v $(pwd):/home/worker -u $(id -u):$(id -g) $selected_version $@
+    if [ -t 1 ]     # check if stdout is a TTY
+    then
+        flag_term="-it"
+    else
+        flag_term="-i"
+    fi
+
+    if [ $1 == 'bash' ]
+    then
+        docker run --rm $flag_term -v $(pwd):/home/worker $selected_version $@
+    else
+        docker run --rm $flag_term -v $(pwd):/home/worker -u $(id -u):$(id -g) $selected_version $@
+    fi
 fi
