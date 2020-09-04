@@ -182,7 +182,9 @@ def verify_program(program, correct_extension='', iterations=1):
     available_list = []
     supported_list = compilers.compiler_extensions(handler.get('compilers'))
 
-    file_list = sorted(glob.glob(program + ".*"))
+    file_list = [x for x in sorted(glob.glob(program + ".*")) if not x.endswith('.exe')]
+    if file_list == []:
+        file_list = [program]
 
     solution_list = []
     excluded_extensions = ['exe', 'dir', correct_extension]

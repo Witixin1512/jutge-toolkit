@@ -644,6 +644,8 @@ py_compile.compile(sys.argv[1])
     def compile(self):
         try:
             self.gen_wrapper()
+            code = util.read_file(self.name + '.py')
+            util.write_file(self.name + '.py', code)
             self.execute_compiler(
                 'python3 py3c.py ' + self.name + '.py 1> /dev/null')
         except CompilationTooLong:
@@ -854,6 +856,8 @@ py_compile.compile(sys.argv[1])
     def compile_normal(self):
         try:
             self.gen_wrapper()
+            code = util.read_file(self.name + '.py')
+            util.write_file(self.name + '.py', code)
             util.write_file('py3c.py',
                             """#!/usr/bin/python3
 

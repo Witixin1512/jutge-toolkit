@@ -13,6 +13,8 @@ import time
 import argparse
 from colorama import init, Fore, Style
 
+from jutge import util
+
 def error(title, reason):
     raise Exception(Style.BRIGHT + Fore.RED + '--- ERROR in question ' + str(title) + ' --- ' + str(reason) + Style.RESET_ALL)
 
@@ -202,12 +204,12 @@ def build_q(fname, title):
 
     # read the python code
     if os.path.exists(py_name):
-        code = open(py_name).read()
+        code = util.read_file(py_name)
     else:
         code = ""
 
     # read the question description
-    q = open(yml_name).read()
+    q = util.read_file(yml_name)
 
     # execute the code, using new global and local dictionaries
     def all_different(*x):
@@ -261,7 +263,7 @@ def check_list(thing, title, name):
 
 def make_quiz(seed):
     try:
-        quiz = yaml.load(open("quiz.yml"), Loader=yaml.FullLoader)
+        quiz = yaml.load(util.read_file("quiz.yml"), Loader=yaml.FullLoader)
     except Exception:
         print(Fore.RED + 'No quiz was found on this folder (quiz.yml is missing)!' + Style.RESET_ALL, file=sys.stderr)
         sys.exit(0)
