@@ -633,10 +633,11 @@ py_compile.compile(sys.argv[1])
             ext = 'py.out'
 
         if self.compile_with(tst + ".inp"):
-            """func.system("python3 %s.py > %s.%s" % (self.name, tst, ext))"""
-            func = 'import os; os.system("python3 %s.py > %s.%s")' % (self.name, tst, ext)
+            os.system("cat solution.py %s.inp > work.py" % tst)
+            func = 'import os; os.system("python3 work.py > %s.%s")' % (tst, ext)
             time = timeit.timeit(func, number=iterations) / iterations
             util.del_dir('__pycache__')
+            util.del_file('work.py')
             return time
         else:
             return -1
