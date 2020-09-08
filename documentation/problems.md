@@ -270,7 +270,28 @@ handler: std
 source_modifier: none
 ````
 
+##### Limiting the maximum time a submission can take
 
+There are two arguments that can be used to determine the maximum time that a submission can take depending on the time the solution took to solve the problem. The submission will have a maximum time to complete the task which is calculated with the following function:
+
+`Maximum submission time: solution_time * time_factor + time_constant.`
+
+`time_factor` and `time_constant` are arguments that can be specified on the `handler.yml`. They are a list with a maximum of 3 values, one for each type of compilers in the following order:
+
+- Fast: Ada, C, C++, D, Fortran, Go, Haskell, Pascal
+- Medium: FreeBASIC, C#, Java, Guile
+- Slow: Brainfuck, Erlang, JavaScript, CLISP, Lua, PHP, Perl, Python, R, Ruby and Whitespace
+
+If one or two values are missing, they will be calculated using the following formulas:`medium = fast*5`; `slow = medium*2`. This applies for both `time_factor` and `time_constant` arguments.
+
+If the arguments have not been specified, the default `time_factor` and `time_constant` values for all the compilers will be `2` and `0.1` respectively.
+
+This is an example of how the arguments would look like in `handler.yml `:
+
+````handler.yml
+time_factor: [2, 10, 2] 
+time_constant: [0.1, 0.01, 0.05]
+````
 
 ### Checker
 
