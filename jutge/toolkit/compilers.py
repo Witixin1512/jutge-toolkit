@@ -103,6 +103,7 @@ class Compiler:
             print(Style.DIM + cmd + Style.RESET_ALL)
 
             error = False
+            result = ''
             try:
                 result = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
             except subprocess.CalledProcessError as exec:
@@ -1045,24 +1046,21 @@ class Compiler_PRO2(Compiler):
 
     def compile(self):
         util.del_file(self.executable())
-        util.del_dir(self.name + ".dir")
+        util.del_dir(self.name + '.dir')
         os.mkdir(self.name + ".dir")
 
         try:
-            if util.file_exists(self.name + ".cc"):
-                util.system('cp ' + self.name + '.cc ' +
-                            self.name + '.dir/program.cc')
-            elif util.file_exists(name + ".hh"):
-                util.system('cp ' + self.name + '.hh ' +
-                            self.name + '.dir/program.hh')
+            if util.file_exists("solution.cc"):
+                util.system('cp solution.cc ' + self.name + '.dir/' + 'program.cc')
+            elif util.file_exists("solution.hh"):
+                util.system('cp solution.hh ' + self.name + '.dir/program.hh')
             else:
-                print("There is no " + self.name +
-                      ".cc nor " + self.name + ".hh")
+                print("There is no solution.cc nor solution.hh")
 
-            util.system(f'cp public/* {self.name}.dir')
-            util.system(f'cp private/* {self.name}.dir')
+            util.system('cp public/* ' + self.name + '.dir')
+            util.system('cp private/* ' + self.name + '.dir')
 
-            os.chdir(self.name + ".dir")
+            os.chdir(self.name + '.dir')
             self.execute_compiler('g++ ' + self.flags1() + ' *.cc -o ../' +
                                   self.executable())
         except CompilationTooLong:
