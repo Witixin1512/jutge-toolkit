@@ -1059,6 +1059,9 @@ class Compiler_PRO2(Compiler):
                 print("There is no " + self.name +
                       ".cc nor " + self.name + ".hh")
 
+            util.system(f'cp public/* {self.name}.dir')
+            util.system(f'cp private/* {self.name}.dir')
+
             os.chdir(self.name + ".dir")
             self.execute_compiler('g++ ' + self.flags1() + ' *.cc -o ../' +
                                   self.executable())
