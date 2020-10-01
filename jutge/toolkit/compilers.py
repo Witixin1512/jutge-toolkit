@@ -1105,11 +1105,6 @@ class Compiler_MakePRO2(Compiler):
         return 'tar'
 
     def compile(self):
-        logging.info('compiling with MakePRO2')
-        logging.info('changing max_compilation_time')
-        global max_compilation_time
-        max_compilation_time = 30
-
         util.del_file(self.executable())
         util.del_dir(self.name + ".dir")
 
@@ -1126,8 +1121,7 @@ class Compiler_MakePRO2(Compiler):
                         self.name + '.dir')
             os.chdir(self.name + '.dir')
 
-            self.execute_compiler('make ' + self.name +
-                                  '.exe 1> make.log')
+            self.execute_compiler('make program.exe 1> make.log')
         except CompilationTooLong:
             print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             os.chdir('..')
@@ -1135,8 +1129,8 @@ class Compiler_MakePRO2(Compiler):
 
         os.chdir('..')
 
-        if util.file_exists(self.name + '.dir/' + self.name + '.exe'):
-            util.copy_file(self.name + '.dir/' + self.name + '.exe', '.')
+        if util.file_exists(self.name + '.dir/program.exe'):
+            util.copy_file(self.name + '.dir/program.exe', './' + self.executable())
 
         util.del_dir(self.name + ".dir")
 
