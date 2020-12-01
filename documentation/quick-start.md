@@ -104,8 +104,8 @@ The input `.tar` file must have the following structure:
 	|	├── sample.cor
 	|	├── tags.yml
 	|	└── ...
-	└── submission.tgzç
-		├── solution.c (file sent by the user)
+	└── submission.tgz
+		├── program.cc (file sent by the user)
 		└── submission.yml
 ```
 
