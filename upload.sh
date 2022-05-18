@@ -8,8 +8,8 @@ read version
 perl -p -i -e "s/^version = .*/version = '$version'/" setup.py
 
 git commit -a
-git push
+git push -m "Release $version"
 git tag $version -m "Release $version"
-git push --tags origin master
+git push origin "$version"
 python3 setup.py sdist bdist_wheel
 python3 -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
