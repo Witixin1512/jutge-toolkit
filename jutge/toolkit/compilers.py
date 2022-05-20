@@ -4,11 +4,13 @@
 import glob
 import logging
 import os
+import shutil
 import signal
 import subprocess
 import sys
 import time
 import timeit
+import turtle_pil
 
 from colorama import Fore, Style
 from jutge import util
@@ -111,7 +113,8 @@ class Compiler:
                 error = True
 
             if error or len(result) != 0:
-                if len(result) != 0: print('\n' + result.decode('utf-8').strip() + '\n')
+                if len(result) != 0:
+                    print('\n' + result.decode('utf-8').strip() + '\n')
                 print(
                     Style.BRIGHT + Fore.RED + 'Compilation error! ' + Style.NORMAL + 'Please check ' + self.name + '.' + self.extension() + ' and try again.' + Style.RESET_ALL)
                 os._exit(1)
@@ -126,7 +129,8 @@ class Compiler:
                 ret = os.waitpid(pid, os.WNOHANG)
                 if ret[0] != 0:
                     # Ok!
-                    if ret[1] != 0: sys.exit(0)
+                    if ret[1] != 0:
+                        sys.exit(0)
                     return
 
                 time.sleep(0.1)
@@ -822,6 +826,10 @@ py_compile.compile(sys.argv[1])
         util.del_file('py3c.py')
 
     def execute(self, tst, correct, iterations=1):
+
+        # hack to use turtle-pil when using turtle
+        shutil.copy(turtle_pil.__file__, 'turtle.py')
+
         if 'source_modifier' in self.handler and (
                 self.handler['source_modifier'] == 'no_main' or self.handler['source_modifier'] == 'structs'):
             util.copy_file(self.name + '.py', 'modified.py')
@@ -844,6 +852,7 @@ py_compile.compile(sys.argv[1])
         time = timeit.timeit(func, number=iterations) / iterations
 
         util.del_file('modified.py')
+        util.del_file('turtle.py')
         util.del_dir('__pycache__')
 
         return time
@@ -1163,15 +1172,19 @@ def available_compilers():
     available_list = []
     supported_list = info()
     for k, v in supported_list.items():
-            if "not found" not in v["version"]:
-                available_list.append(k)
+        if "not found" not in v["version"]:
+            available_list.append(k)
 
-    if available_list != {}: print("Available compilers:", end = ' ')
+    if available_list != {}:
+        print("Available compilers:", end=' ')
     for compiler in available_list:
-        print(compiler, end = '')
-        if compiler == available_list[-2]: print(' and ', end = '')
-        elif compiler != available_list[-1]: print(', ', end = '')
-        else: print()
+        print(compiler, end='')
+        if compiler == available_list[-2]:
+            print(' and ', end='')
+        elif compiler != available_list[-1]:
+            print(', ', end='')
+        else:
+            print()
 
 
 def compiler(cpl, handler=None, name=None):
