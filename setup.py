@@ -4,7 +4,7 @@
 from setuptools import setup
 from os import system
 
-version = '2.8.2'
+version = '2.8.3'
 
 setup(
     name='jutge-toolkit',

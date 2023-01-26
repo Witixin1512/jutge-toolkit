@@ -10,7 +10,9 @@ import subprocess
 import sys
 import time
 import timeit
+
 import turtle_pil
+import yogi
 
 from colorama import Fore, Style
 from jutge import util
@@ -902,6 +904,69 @@ py_compile.compile(sys.argv[1])""")
             print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
         self.del_wrapper()
+        return True
+
+
+class Compiler_Codon(Compiler):
+    compilers.append('Codon')
+
+    def name(self):
+        return 'Codon'
+
+    def type(self):
+        return 'compiler'
+
+    def executable(self):
+        return self.name + '.codon.exe'
+
+    def language(self):
+        return 'Python'
+
+    def version(self):
+        return self.get_version('codon --version', 0)
+
+    def flags1(self):
+        return '-release'
+
+    def flags2(self):
+        return '-release'
+
+    def extension(self):
+        return 'codon'
+
+    def execute(self, tst, correct, iterations=1):
+
+        ext = 'cor' if correct else 'codon.out'
+        cmd = f"./{self.executable()} < {tst}.inp > {tst}.{ext}"
+        print(cmd)
+
+        def func():
+            os.system(cmd)
+
+        time = timeit.timeit(func, number=iterations) / iterations
+
+        return time
+
+    def compile(self):
+        # TBD: compile no main
+        return self.compile_normal()
+
+    def compile_normal(self):
+        util.del_file(self.executable())
+
+        # hack to use yogi
+        if not os.path.exists('yogi.codon'):
+            shutil.copy(os.path.dirname(yogi.__file__) + '/yogi.codon', '.')
+
+        try:
+            self.execute_compiler('codon build -exe ' + self.flags1() + ' ' + self.name + '.codon')
+        except CompilationTooLong:
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
+            util.del_file(self.executable())
+            return False
+        if not util.file_exists(self.name):
+            return False
+        util.move_file(self.name, self.executable())
         return True
 
 
