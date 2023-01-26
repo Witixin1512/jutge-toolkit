@@ -7,8 +7,8 @@ read version
 
 perl -p -i -e "s/^version = .*/version = '$version'/" setup.py
 
-git commit -a
-git push -m "Release $version"
+git commit -a -m "Release $version"
+git push 
 git tag $version -m "Release $version"
 git push origin "$version"
 python3 setup.py sdist bdist_wheel
