@@ -19,7 +19,7 @@ fi
 
 for jutge_version in jutge-server jutge-full jutge-lite jutge-test
 do
-    ver="$(docker image ls | awk '{print $1}' | grep $jutge_version)"
+    ver="$(docker image ls | awk '{print $1}' | grep $jutge_version | tail -1)"
     if [ "$ver" ]
     then
         selected_version="$ver"
