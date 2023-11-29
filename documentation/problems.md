@@ -257,11 +257,18 @@ The file `handler.yml` contains the information of how to handle the problem usi
 There are also optional arguments that may be used:
 
 - `checker`: Option that will tell [Jutge.org](https://jutge.org/) how to compare the user's program output with the problem solution. See [Checker](#checker) for more information.
+
 - `compilers`: Compiler that [Jutge.org](https://jutge.org/) will use to correct the problem. If specified, this will be the only compiler available on the website if an user wants to send his submission. You will find a list of available compilers in https://jutge.org/documentation/compilers.
+
 - `func_name`: Name of the function requested in case the problem only asks for a function (this must be used along with `source_modifier: no_main`)
+
 - `invisible_main`: If set to `1`, the `main.cc` file will not be provided to users. This is used by problems that do not require to write a `main` function.
+
 - `presentation_error`: If set to `1 ` (by default), the PE (Presentation Error) verdict will be enabled. Otherwise, the verdict will be WA (Wrong Answer) if the files are not identical.
+
 - `solution`: Programming language of the solution that will be used to generate the correct output test cases. By default, if a compiler is specified under `compilers` it will use that language. Otherwise, it will use the C++ solution.
+
+- `pylibs`: Problems in Python can allow the usage of certain non standard Python libraries. `pylibs` is a list of libraries that may be used to solve the current problem. For instance, `pylibs: [numpy, networkx]`. By default, this list is empty. Available libraries are in https://jutge.org/documentation/pylibs.
 
 By default, the content of `handler.yml ` should be like this:
 
