@@ -18,6 +18,6 @@ tar xf -
 chmod -R u+rwX,go-rwx .
 jutge-start $name
 cd correction
-tar czf - *
+tar czf --dereference - *
 cd ../..
 rm -rf $name
