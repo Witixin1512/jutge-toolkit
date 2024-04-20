@@ -16,7 +16,7 @@ mkdir $name
 cd $name
 tar xf -
 chmod -R u+rwX,go-rwx .
-jutge-start $name
+timeout 320 jutge-start $name
 cd correction
 tar czf --dereference - *
 cd ../..
