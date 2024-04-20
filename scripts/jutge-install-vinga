@@ -27,5 +27,5 @@ sudo chmod 700 /usr/local/bin/jutge-somhi
 ls -la /usr/local/bin/jutge-vinga
 ls -la /usr/local/bin/jutge-somhi
 
-$user=worker
+user=worker
 echo "$user ALL=(ALL) NOPASSWD: /usr/local/bin/jutge-somhi" | (sudo su -c 'EDITOR="tee -a" visudo -f /etc/sudoers.d/$user')
