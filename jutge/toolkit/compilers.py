@@ -1230,6 +1230,106 @@ class Compiler_MakePRO2(Compiler):
         return time
 
 
+        self.del_wrapper()
+
+
+class Compiler_RunClojure(Compiler):
+    compilers.append('RunClojure')
+
+    def name(self):
+        return 'Clojure (for testing functions in judge)'
+
+    def type(self):
+        return 'interpreter (vm)'
+
+    def executable(self):
+        return self.name + '.clj'
+
+    def language(self):
+        return 'Clojure'
+
+    def version(self):
+        return self.get_version('clj --version', 0)
+
+    def flags1(self):
+        return ''
+
+    def flags2(self):
+        return ''
+
+    def extension(self):
+        return 'clj'
+
+    def gen_wrapper(self):
+        util.write_file("deps.edn",
+"""
+{:paths ["src"]}
+""")
+        os.makedirs("src", exist_ok=True)
+        util.write_file("src/core.clj","(ns core)\n\n")
+        util.system("cat " + self.name + ".clj >> src/core.clj")
+
+    def del_wrapper(self):
+        util.del_file('src/core.clj')
+        os.rmdir("src")
+        util.del_file('deps.edn')
+
+    def execute(self, tst, correct, iterations=1):
+        if correct:
+            ext = 'cor'
+            print('clj -M work.clj > %s.%s' % (tst, ext))
+        else:
+            ext = 'clj.out' 
+
+        if self.compile_with(tst + '.inp'):
+            f = open("work.clj", "a")
+            print("(use 'core)", file=f)
+            for line in open(tst + '.inp').readlines():
+                line = line.rstrip()
+                print("(println %s)" % line, file=f)
+            f.close()            
+            self.gen_wrapper()
+            func = 'import os; os.system("clj -M work.clj > %s.%s")' % (tst, ext)
+            time = timeit.timeit(func, number=iterations) / iterations
+            self.del_wrapper()
+            util.del_file('work.clj')
+            return time
+        else:
+            return -1
+
+
+    def compile_with(self, extra):
+        try:
+            f = open("work.clj", "a")
+            print("(use 'core)", file=f)
+            for line in open(extra).readlines():
+                line = line.rstrip()
+                print("(println %s)" % line, file=f)
+            f.close()
+            self.gen_wrapper()
+            self.execute_compiler('clj -M work.clj 1> /dev/null')
+            self.del_wrapper()
+            util.del_file('work.clj')
+            return True
+        except CompilationTooLong:
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
+            self.del_wrapper()
+            util.del_file('work.clj')
+            return False
+        return False
+
+
+    def compile(self):
+        try:
+            self.gen_wrapper()
+            self.execute_compiler('clj -M %s.clj 1> /dev/null' % self.name)
+        except CompilationTooLong:
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
+            return False
+        self.del_wrapper()
+        return True
+
+
 ################################################################################
 
 
