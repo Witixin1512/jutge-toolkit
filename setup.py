@@ -4,7 +4,7 @@
 from setuptools import setup
 from os import system
 
-version = '2.11.2'
+version = '2.12.0'
 
 setup(
     name='jutge-toolkit',
@@ -26,7 +26,7 @@ setup(
         'more-itertools',
         'networkx',
         'numpy',
-        'optilog',
+        # 'optilog',    # currently not available for Python 3.12
         'pandas',
         'scipy',
         'simpy',
@@ -60,4 +60,3 @@ setup(
         'scripts/jutge-install-verilog',
     ]
 )
-
