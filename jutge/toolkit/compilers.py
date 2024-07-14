@@ -1260,20 +1260,6 @@ class Compiler_RunClojure(Compiler):
     def extension(self):
         return 'clj'
 
-    def gen_wrapper(self):
-        util.write_file("deps.edn",
-"""
-{:paths ["src"]}
-""")
-        os.makedirs("src", exist_ok=True)
-        util.write_file("src/core.clj","(ns core)\n\n")
-        util.system("cat " + self.name + ".clj >> src/core.clj")
-
-    def del_wrapper(self):
-        util.del_file('src/core.clj')
-        os.rmdir("src")
-        util.del_file('deps.edn')
-
     def execute(self, tst, correct, iterations=1):
         if correct:
             ext = 'cor'
@@ -1281,52 +1267,23 @@ class Compiler_RunClojure(Compiler):
         else:
             ext = 'clj.out' 
 
-        if self.compile_with(tst + '.inp'):
-            f = open("work.clj", "a")
-            print("(use 'core)", file=f)
-            for line in open(tst + '.inp').readlines():
-                line = line.rstrip()
-                print("(println %s)" % line, file=f)
-            f.close()            
-            self.gen_wrapper()
-            func = 'import os; os.system("clj -M work.clj > %s.%s")' % (tst, ext)
-            time = timeit.timeit(func, number=iterations) / iterations
-            self.del_wrapper()
-            util.del_file('work.clj')
-            return time
-        else:
-            return -1
-
-
-    def compile_with(self, extra):
-        try:
-            f = open("work.clj", "a")
-            print("(use 'core)", file=f)
-            for line in open(extra).readlines():
-                line = line.rstrip()
-                print("(println %s)" % line, file=f)
-            f.close()
-            self.gen_wrapper()
-            self.execute_compiler('clj -M work.clj 1> /dev/null')
-            self.del_wrapper()
-            util.del_file('work.clj')
-            return True
-        except CompilationTooLong:
-            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
-            self.del_wrapper()
-            util.del_file('work.clj')
-            return False
-        return False
-
+        util.system('cp %s.clj work.clj' % self.name)
+        f = open("work.clj", "a")
+        for line in open(tst + '.inp').readlines():
+            line = line.rstrip()
+            print("(println %s)" % line, file=f)
+        f.close()            
+        func = 'import os; os.system("clj -M work.clj > %s.%s")' % (tst, ext)
+        time = timeit.timeit(func, number=iterations) / iterations
+        util.del_file('work.clj')
+        return time
 
     def compile(self):
         try:
-            self.gen_wrapper()
             self.execute_compiler('clj -M %s.clj 1> /dev/null' % self.name)
         except CompilationTooLong:
             print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             return False
-        self.del_wrapper()
         return True
 
 
@@ -1340,7 +1297,7 @@ class Compiler_Clojure(Compiler):
         return 'compiler (vm)'    
 
     def executable(self):
-        return 'core.jar'
+        return self.name + '.clj'
 
     def language(self):
         return 'Clojure'
@@ -1358,24 +1315,7 @@ class Compiler_Clojure(Compiler):
         return 'clj'
 
     def gen_wrapper(self):
-        util.write_file("deps.edn",
-"""
-{
-    :paths ["src"]
-    :aliases {
-        :uberjar {
-            :replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
-            :exec-fn hf.depstar/uberjar
-            :exec-args {:aot false}
-        }
-        :jar {
-            :replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
-            :exec-fn hf.depstar/jar
-            :exec-args {}
-        }
-    }
-}
-""")
+        util.write_file("deps.edn", '{:paths ["src"]}')
         os.makedirs("src", exist_ok=True)
         util.write_file("src/core.clj","(ns core)\n\n")
         util.system("cat " + self.name + ".clj >> src/core.clj")
@@ -1386,29 +1326,27 @@ class Compiler_Clojure(Compiler):
         util.del_file('deps.edn')
 
     def execute(self, tst, correct, iterations=1):
-        print("*** execute ***")
         if correct:
             ext = 'cor'
-            print('jar over %s.%s' % (tst, ext))
+            #print('clj -M %s.clj  < %s.inp > %s.%s' % (self.name, tst, tst, ext))
         else:
             ext = 'clj.out' 
 
-        func = 'import os; os.system("java -cp core.jar clojure.main -m core < %s.inp > %s.%s")' % (tst, tst, ext)
+        self.gen_wrapper()
+        func = 'import os; os.system("clj -M -e \\\"(use \'core)(-main)\\\"  < %s.inp > %s.%s")' % (tst, tst, ext)
         time = timeit.timeit(func, number=iterations) / iterations
-        # util.del_file('core.jar')
+        self.del_wrapper()
         return time
 
     def compile(self):
-        print("*** compile ***")
-        self.gen_wrapper()
         try:
-            self.execute_compiler('clojure -X:uberjar :jar core.jar 1> /dev/null 2> /dev/null')  # 1> /dev/null
-            print("*** compiled!!! ***")
+            self.gen_wrapper()
+            self.execute_compiler(('clj -M %s.clj 1> /dev/null' % self.name))
+            self.del_wrapper()
         except CompilationTooLong:
             print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
             self.del_wrapper()
             return False
-        self.del_wrapper()
         return True
 
 
