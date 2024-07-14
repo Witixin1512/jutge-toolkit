@@ -1330,6 +1330,88 @@ class Compiler_RunClojure(Compiler):
         return True
 
 
+class Compiler_Clojure(Compiler):
+    compilers.append('Clojure')
+
+    def name(self):
+        return 'Clojure'
+
+    def type(self):
+        return 'compiler (vm)'    
+
+    def executable(self):
+        return 'core.jar'
+
+    def language(self):
+        return 'Clojure'
+
+    def version(self):
+        return self.get_version('clj --version', 0)
+
+    def flags1(self):
+        return ''
+
+    def flags2(self):
+        return ''
+
+    def extension(self):
+        return 'clj'
+
+    def gen_wrapper(self):
+        util.write_file("deps.edn",
+"""
+{
+    :paths ["src"]
+    :aliases {
+        :uberjar {
+            :replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+            :exec-fn hf.depstar/uberjar
+            :exec-args {:aot false}
+        }
+        :jar {
+            :replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
+            :exec-fn hf.depstar/jar
+            :exec-args {}
+        }
+    }
+}
+""")
+        os.makedirs("src", exist_ok=True)
+        util.write_file("src/core.clj","(ns core)\n\n")
+        util.system("cat " + self.name + ".clj >> src/core.clj")
+
+    def del_wrapper(self):
+        util.del_file('src/core.clj')
+        os.rmdir("src")
+        util.del_file('deps.edn')
+
+    def execute(self, tst, correct, iterations=1):
+        print("*** execute ***")
+        if correct:
+            ext = 'cor'
+            print('jar over %s.%s' % (tst, ext))
+        else:
+            ext = 'clj.out' 
+
+        func = 'import os; os.system("java -cp core.jar clojure.main -m core < %s.inp > %s.%s")' % (tst, tst, ext)
+        time = timeit.timeit(func, number=iterations) / iterations
+        # util.del_file('core.jar')
+        return time
+
+    def compile(self):
+        print("*** compile ***")
+        self.gen_wrapper()
+        try:
+            self.execute_compiler('clojure -X:uberjar :jar core.jar 1> /dev/null 2> /dev/null')  # 1> /dev/null
+            print("*** compiled!!! ***")
+        except CompilationTooLong:
+            print(Style.BRIGHT + Fore.RED + 'Compilation time exceeded!' + Style.RESET_ALL)
+            self.del_wrapper()
+            return False
+        self.del_wrapper()
+        return True
+
+
 ################################################################################
 
 
