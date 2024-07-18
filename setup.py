@@ -4,7 +4,7 @@
 from setuptools import setup
 from os import system
 
-version = '2.12.2'
+version = '2.13.0'
 
 setup(
     name='jutge-toolkit',
@@ -51,7 +51,7 @@ setup(
             'jutge-available-compilers=jutge.toolkit:compilers.available_compilers',
             'jutge-start=jutge.toolkit:start.main',
             'jutge-code-metrics=jutge.toolkit:code_metrics.main',
-            'jutge-sanitize=jutge.toolkit:cleanup.main'
+            'jutge-sanitize=jutge.toolkit:sanitize.main'
         ]
     },
     scripts=[
