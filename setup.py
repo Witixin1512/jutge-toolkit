@@ -4,7 +4,7 @@
 from setuptools import setup
 from os import system
 
-version = '2.13.1'
+version = '3.0.0'
 
 setup(
     name='jutge-toolkit',
@@ -55,9 +55,5 @@ setup(
         ]
     },
     scripts=[
-        'scripts/jutge-run',
-        'scripts/jutge-submit',
-        'scripts/jutge-install-vinga',
-        'scripts/jutge-install-verilog',
     ]
 )
